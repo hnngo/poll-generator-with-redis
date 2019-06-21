@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "client": "npm start --prefix views",
-    "dev": "concurrently \"node index.js\" \"npm run client\""
+    "dev": "concurrently \"nodemon index.js\" \"npm run client\"",
+    "vagrant": "npm run build --prefix views && npm start"
   },
   "author": "",
   "license": "ISC",
