@@ -47,6 +47,10 @@ $theme-colors: (
     height: 2px;
     background-color: map-get($map: $theme-colors, $key: dim-orange);
   }
+
+  .app-content {
+    width: 100%;
+  }
 }
 
 .nav-btn-container {
@@ -98,4 +102,6 @@ $theme-colors: (
 .polling-containter {
   margin-top: 20px;
   color: white;
+
+
 }

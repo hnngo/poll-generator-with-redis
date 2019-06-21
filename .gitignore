@@ -2,3 +2,4 @@ node_modules
 .vagrant
 .DS_Store
 *.txt
+*.rdb

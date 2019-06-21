@@ -45,6 +45,10 @@ code {
   background-color: #d8b18294;
 }
 
+.app-container .app-content {
+  width: 100%;
+}
+
 .nav-btn-container {
   display: -webkit-box;
   display: -ms-flexbox;
