@@ -20,9 +20,9 @@ sudo apt-get -y install nodejs
 sudo apt-get -y install npm
 
 # Build react folder
-cd /vagrant/views
-sudo npm run build
-cd ~
+# cd /vagrant/views
+# sudo npm run build
+# cd ~
 
 # Copy nginx config to default
 sudo rm /etc/nginx/sites-available/default

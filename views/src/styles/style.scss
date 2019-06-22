@@ -22,7 +22,9 @@ $theme-colors: (
   "disabled-text": #aaaaaa,
   "dark-orange": #e0662e,
   "main-orange": #e6b87c,
-  "dim-orange": #d8b18294
+  "dim-orange": #d8b18294,
+  "shadow-orange": #e7c89f,
+  "shadow-dark": #333333
 );
 
 
@@ -103,5 +105,21 @@ $theme-colors: (
   margin-top: 20px;
   color: white;
 
+  .polling-btn-start {
+    margin: 10px;
+  }
+}
 
+.btn-main-orange {
+  padding: 10px 20px;
+  border-radius: 10px;
+  background-color: map-get($map: $theme-colors, $key: main-orange);
+  color: map-get($map: $theme-colors, $key: off-white);
+  border: none;
+  outline: none!important;
+  box-shadow: 0px 0px 4px 0px map-get($map: $theme-colors, $key: shadow-orange);
+
+  &:active {
+    box-shadow: inset 0px 0px 4px 0px map-get($map: $theme-colors, $key: shadow-dark);
+  }
 }

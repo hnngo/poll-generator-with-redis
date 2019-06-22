@@ -2,22 +2,30 @@ const express = require('express');
 const router = express.Router();
 const _ = require('lodash');
 
+function guidGenerator() {
+  var S4 = function() {
+     return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+  };
+  return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
+}
+
 //  @METHOD   POST
-//  @PATH     /polling/start      
+//  @PATH     /polling/create      
 //  @DESC     Start the polling with predefined setting
-router.post('/start', (req, res) => {
+router.post('/create', (req, res) => {
   const pollingSettings = {};
   const { redisClient } = res.locals;
   const {
+    question,
     numberOfSlections,
     optionalNames,
     optionalStartingScores
   } = req.body;
 
   // Check requirement
-  if (!numberOfSlections || isNaN(numberOfSlections)) {
-    console.log("Invalid number of selections input");
-    return res.json({ message: "Invalid number of selections input" });
+  if (!numberOfSlections || isNaN(numberOfSlections) || !question.length) {
+    console.log("Invalid polling information");
+    return res.json({ message: "Invalid polling information" });
   } else if (!redisClient) {
     console.log("Cannot connect to Redis server");
     return res.json({ message: "Cannot connect to Redis server" });
@@ -31,7 +39,7 @@ router.post('/start', (req, res) => {
   } else {
     pollingSettings.names = [];
     for (let i = 0; i < +numberOfSlections; i++) {
-      pollingSettings.selectnamesionNames.push("Client " + (i + 1));
+      pollingSettings.names.push("Client " + (i + 1));
     }
   }
 
@@ -45,7 +53,7 @@ router.post('/start', (req, res) => {
 
   // Create set
   const args = _.flatten(_.zip(pollingSettings.startingScores, pollingSettings.names));
-  args.unshift('leaderboard');
+  args.unshift('question');
 
   // Add to redis
   redisClient.zadd(args, function (err, response) {
