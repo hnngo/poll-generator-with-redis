@@ -59,7 +59,7 @@ code {
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 10px;
 }
 
 .nav-btn-container .tab-active {

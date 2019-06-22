@@ -7,6 +7,12 @@ sudo apt-get upgrade -y
 # Install redis
 sudo apt-get install redis-server -y
 
+# Install postgresql
+sudo apt-get install wget ca-certificates
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" >> /etc/apt/sources.list.d/pgdg.list'
+sudo apt-get install postgresql postgresql-contrib -y
+
 # Install nginx
 sudo apt-get install nginx -y
 sudo systemctl start nginx
@@ -34,5 +40,8 @@ sudo /etc/init.d/nginx reload
 # cd /vagrant/ 
 # sudo node index.js
 
+# Run postgresql in vagrant
+# sudo su - postgres
+# psql
 
 

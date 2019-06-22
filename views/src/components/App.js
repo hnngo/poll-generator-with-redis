@@ -3,15 +3,16 @@ import socketIOClient from 'socket.io-client';
 import '../styles/style.css';
 import '../styles/bootstrap.min.css';
 import NavButtons from './NavButtons';
-import ExamplePolling from './polling/ExamplePolling';
-import NewPolling from './polling/NewPolling';
+import ExamplePolling from './poll/CurrentPolls';
+import NewPolling from './poll/NewPoll';
 import {
-  TAB_EXAMPLE_POLLING,
-  TAB_NEW_POLLING
+  TAB_CURRENT_POLL,
+  TAB_NEW_POLL
 } from '../constants';
+import HeaderLightBar from './HeaderLightBar';
 
 const App = (props) => {
-  const [viewTab, setViewTab] = useState(TAB_EXAMPLE_POLLING);
+  const [viewTab, setViewTab] = useState(TAB_CURRENT_POLL);
 
   // Connect socketio
   useEffect(() => {
@@ -21,17 +22,18 @@ const App = (props) => {
   });
 
   const renderContent = () => {
-    if (viewTab === TAB_EXAMPLE_POLLING) {
+    if (viewTab === TAB_CURRENT_POLL) {
       return <ExamplePolling />;
-    } else if (viewTab === TAB_NEW_POLLING) {
+    } else if (viewTab === TAB_NEW_POLL) {
       return <NewPolling />;
     }
   };
 
   return (
     <div className="app-container">
+      <HeaderLightBar />
       <div className="app-header">
-        <p>Polling Generator</p>
+        <p>Poll Generator</p>
       </div>
       <div className="app-nav-btn">
         <NavButtons onSelect={(tab) => setViewTab(tab)} />

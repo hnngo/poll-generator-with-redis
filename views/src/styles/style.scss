@@ -18,15 +18,46 @@ code {
 }
 
 $theme-colors: (
-  "off-white": #dfdfdf,
+  "off-white":     #dfdfdf,
   "disabled-text": #aaaaaa,
-  "dark-orange": #e0662e,
-  "main-orange": #e6b87c,
-  "dim-orange": #d8b18294,
+  "dark-orange":   #e0662e,
+  "main-orange":   #e6b87c,
+  "dim-orange":    #d8b18294,
   "shadow-orange": #e7c89f,
-  "shadow-dark": #333333
+  "shadow-dark":   #333333
 );
 
+$breakpoints: (
+  "phone":        576px,
+  "tablet":       768px,
+  "tablet-wide":  992px,
+  "desktop":      1200px,
+  "desktop-wide": 1440px
+);
+
+// Media querries
+@mixin mq($width, $type: min) {
+  @if map-has-key($map: $breakpoints, $key: $width){
+    $width: map-get($map: $breakpoints, $key: $width);
+    @if $type == max {
+      $width: $width - 1px;
+      @media only screen and (max-width: $width) {
+        @content;
+      }
+    } @else {
+      @media only screen and (min-width: $width) {
+        @content;
+      }
+    }
+  }
+};
+
+// Display set
+@mixin display ($type: unset, $justifyConten: unset, $alignItems: unset) {
+  display: $type;
+  justify-content: $justifyConten;
+  align-items: $alignItems;
+}
 
 .app-container {
   text-align: center;
@@ -35,6 +66,10 @@ $theme-colors: (
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  .header-light-bar {
+   
+  }
 
   .app-header {
     font-size: 3.5rem;
@@ -59,7 +94,7 @@ $theme-colors: (
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 10px;
 
   .tab-active {
     color: map-get($map: $theme-colors, $key: main-orange);
