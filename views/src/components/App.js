@@ -3,11 +3,15 @@ import socketIOClient from 'socket.io-client';
 import '../styles/style.css';
 import '../styles/bootstrap.min.css';
 import NavButtons from './NavButtons';
-import ExamplePolling from './poll/CurrentPolls';
-import NewPolling from './poll/NewPoll';
+import CurrentPolls from './poll/CurrentPolls';
+import NewPoll from './poll/NewPoll';
+import SignInForm from './form/SignInForm';
+import SignUpForm from './form/SignUpForm';
 import {
   TAB_CURRENT_POLL,
-  TAB_NEW_POLL
+  TAB_NEW_POLL,
+  TAB_SIGN_IN,
+  TAB_SIGN_UP
 } from '../constants';
 import HeaderLightBar from './HeaderLightBar';
 
@@ -22,16 +26,23 @@ const App = (props) => {
   });
 
   const renderContent = () => {
-    if (viewTab === TAB_CURRENT_POLL) {
-      return <ExamplePolling />;
-    } else if (viewTab === TAB_NEW_POLL) {
-      return <NewPolling />;
+    switch (viewTab) {
+      case TAB_CURRENT_POLL:
+        return <CurrentPolls />;
+      case TAB_NEW_POLL:
+        return <NewPoll />;
+      case TAB_SIGN_IN:
+        return <SignInForm />;
+      case TAB_SIGN_UP:
+        return <SignUpForm />;
+      default:
+        return <div />;
     }
   };
 
   return (
     <div className="app-container">
-      <HeaderLightBar />
+      <HeaderLightBar onSelect={(tab) => setViewTab(tab)} />
       <div className="app-header">
         <p>Poll Generator</p>
       </div>

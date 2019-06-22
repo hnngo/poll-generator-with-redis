@@ -2,6 +2,8 @@
 export const TAB_CURRENT_POLL = "TAB_CURRENT_POLL";
 export const TAB_NEW_POLL = "TAB_NEW_POLL";
 export const TAB_YOUR_POLLS = "TAB_YOUR_POLLS";
+export const TAB_SIGN_IN = "TAB_SIGN_IN";
+export const TAB_SIGN_UP = "TAB_SIGN_UP";
 
 // SETTING TYPE
 export const TYPE_INPUT_NUMBER = "TYPE_INPUT_NUMBER";
