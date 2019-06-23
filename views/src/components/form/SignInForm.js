@@ -9,11 +9,6 @@ import InputField from './InputField';
 // } from '../../actions';
 
 const SignInForm = (props) => {
-  // const { clearErrMsg } = props;
-  // useEffect(() => {
-  //   clearErrMsg();
-  // }, [clearErrMsg]);
-
   const renderLoading = () => {
     if (props.isLoading) {
       return (
@@ -38,57 +33,59 @@ const SignInForm = (props) => {
 
   return (
     <div className="auth-form-container">
-      <p>Sign In</p>
-      <form 
-      // onSubmit={props.handleSubmit(() => props.signInWithEmailAndPassword(props.formValues, props.history))}
-      >
-        <Field
-          name="email"
-          component={InputField}
-          type="email"
-          placeholder="email@test.com"
-          // validate={valid.isEmail}
-          icon={"fas fa-envelope"}
-        />
-        <Field
-          name="password"
-          component={InputField}
-          type="password"
-          placeholder="password"
-          // validate={valid.minLength6}
-          icon={"fas fa-key"}
-        />
-        {/* <ErrorMsg /> */}
-        <button
-          type="submit"
+      <div className="container">
+        <p className="auth-header">Sign In</p>
+        <form
+          onSubmit={props.handleSubmit((val) => console.log(val))}
         >
-          Sign In
-        </button>
-        <a href="/auth/google">
-          <div className="google-btn">
-            <i className="fab fa-google" />
-            Sign in with Google
+          <div className="row">
+            <div className="col-3">
+              <label className="input-label">Email</label>
+            </div>
+            <div className="col-9">
+              <Field
+                name="email"
+                component={InputField}
+                type="email"
+                placeholder="nick@test.com"
+                // validate={valid.isEmail}
+                icon={"fas fa-envelope"}
+              />
+            </div>
           </div>
-        </a>
-        <div
-          className="sin-sup-switch"
+          <div className="row">
+            <div className="col-3">
+              <label className="input-label">Password</label>
+            </div>
+            <div className="col-9">
+              <Field
+                name="password"
+                component={InputField}
+                type="password"
+                placeholder="password"
+                // validate={valid.minLength6}
+                icon={"fas fa-key"}
+              />
+            </div>
+          </div>
+          {/* <ErrorMsg /> */}
+          <button type="submit" className="btn-main-orange">
+            Sign In
+          </button>
+          <div
+            className="auth-switch"
           // onClick={() => props.handleSwitchForm(SIGN_UP_FORM)}
-        >
-          New user? Click here to sign up
-        </div>
-        <div
-          className="form-exit"
-          // onClick={props.handleExitForm}
-        >
-          <i className="fas fa-times" />
-        </div>
-      </form>
-      {renderLoading()}
+          >
+            New user? Click here to sign up
+          </div>
+        </form>
+        {renderLoading()}
+      </div>
     </div>
   );
 };
 
-// const mapStateToProps = ({ form }) => {
+// const mapStateToProps = ({form}) => {
 //   if (form.signin) {
 //     return {
 //       formValues: form.signin.values

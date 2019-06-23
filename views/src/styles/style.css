@@ -148,7 +148,7 @@ code {
   padding: 10px 20px;
   border-radius: 10px;
   background-color: #e6b87c;
-  color: #dfdfdf;
+  color: #555555;
   border: none;
   outline: none !important;
   -webkit-box-shadow: 0px 0px 4px 0px #e7c89f;
@@ -158,5 +158,75 @@ code {
 .btn-main-orange:active {
   -webkit-box-shadow: inset 0px 0px 4px 0px #333333;
           box-shadow: inset 0px 0px 4px 0px #333333;
+}
+
+.btn-main-orange button {
+  border: none;
+  background: none;
+}
+
+.auth-form-container {
+  padding: 20px 0px;
+  position: absolute;
+  top: unset;
+  right: unset;
+  bottom: unset;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+          transform: translateX(-50%);
+  min-width: 320px;
+}
+
+.auth-form-container .auth-header {
+  color: #e6b87c;
+  font-size: 20px;
+}
+
+.auth-form-container form .row {
+  margin: 14px 0;
+}
+
+.auth-form-container form .row .col-3 {
+  padding: 0;
+  text-align: right;
+}
+
+.auth-form-container form .row .input-label {
+  color: #e6b87c;
+  padding: 5px 0;
+}
+
+.auth-form-container form .btn-main-orange {
+  margin-top: 10px;
+  padding: 6px 100px;
+}
+
+.auth-form-container form .auth-switch {
+  color: white;
+  margin-top: 30px;
+  font-size: 14px;
+}
+
+.input-field input {
+  border: none;
+  background-color: #cab79d6e;
+  padding: 5px 0px 5px 10px;
+  border-radius: 10px;
+}
+
+.input-field input::-webkit-input-placeholder {
+  color: rgba(185, 184, 184, 0.568);
+}
+
+.input-field input:-ms-input-placeholder {
+  color: rgba(185, 184, 184, 0.568);
+}
+
+.input-field input::-ms-input-placeholder {
+  color: rgba(185, 184, 184, 0.568);
+}
+
+.input-field input::placeholder {
+  color: rgba(185, 184, 184, 0.568);
 }
 /*# sourceMappingURL=style.css.map */

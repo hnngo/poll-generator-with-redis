@@ -2,23 +2,7 @@ const express = require("express");
 const redis = require('redis');
 const redisClient = redis.createClient();
 const pollingRoutes = require('./routes/pollingRoutes');
-const { Pool, Client } = require('pg');
-
-const connectionString = 'postgresql://me:password@localhost:5432/pollredis';
-const pool = new Pool({connectionString})
-
-pool.query('SELECT NOW()', (err, res) => {
-  console.log(err, res)
-  pool.end()
-})
-
-const postgresClient = new Client({connectionString})
-postgresClient.connect()
-
-postgresClient.query('SELECT NOW()', (err, res) => {
-  console.log(err, res)
-  postgresClient.end()
-})
+require('./models/postgres');
 
 // Create express app
 const app = express();

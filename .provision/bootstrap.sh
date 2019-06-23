@@ -46,14 +46,22 @@ sudo locale-gen en_US.UTF-8
 
 # Create roles and database
 # sudo -u postgres psql
-sudo -u postgres psql -c "CREATE ROLE me WITH LOGIN PASSWORD 'password';"
-sudo -u postgres psql -c "ALTER ROLE me CREATEDB;"
+sudo -u postgres psql -c "CREATE ROLE polladmin WITH LOGIN PASSWORD 'password';"
+sudo -u postgres psql -c "ALTER ROLE polladmin CREATEDB;"
 sudo -u postgres psql -c "CREATE DATABASE pollredis;"
-sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE pollredis TO me;"
+sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE pollredis TO polladmin;"
+
+# Create table user
+sudo -u postgres psql -c "CREATE TABLE users (
+  userId SERIAL PRIMARY KEY,
+  name VARCHAR(30) NOT NULL,
+  email VARCHAR(30) NOT NULL,
+  password VARCHAR(30) NOT NULL
+);"
 
 # Run the server
-cd /vagrant/ 
-sudo node index.js
+# cd /vagrant/ 
+# sudo node index.js
 
 # Run postgresql in vagrant
 # sudo su - postgres

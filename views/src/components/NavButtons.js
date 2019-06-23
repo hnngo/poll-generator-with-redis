@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   TAB_CURRENT_POLL,
   TAB_NEW_POLL,
@@ -6,7 +6,12 @@ import {
 } from '../constants';
 
 const NavButtons = (props) => {
+  const { nonSelect } = props;
   const [viewTab, setViewTab] = useState(TAB_CURRENT_POLL);
+
+  useEffect(() => {
+    if (nonSelect) setViewTab(false);
+  }, [nonSelect])
 
   return (
     <div className="nav-btn-container">
