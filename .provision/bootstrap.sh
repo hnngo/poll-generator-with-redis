@@ -46,13 +46,15 @@ sudo locale-gen en_US.UTF-8
 
 # Create roles and database
 # sudo -u postgres psql
+sudo cp /vagrant/.provision/postgresql/.pgpass ~/.pgpass
+sudo chmod 0600 ~/.pgpass
 sudo -u postgres psql -c "CREATE ROLE polladmin WITH LOGIN PASSWORD 'password';"
 sudo -u postgres psql -c "ALTER ROLE polladmin CREATEDB;"
 sudo -u postgres psql -c "CREATE DATABASE pollredis;"
 sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE pollredis TO polladmin;"
 
 # Create table user
-sudo -u postgres psql -c "CREATE TABLE users (
+psql -U polladmin pollredis -h localhost -c "CREATE TABLE users (
   userId SERIAL PRIMARY KEY,
   name VARCHAR(30) NOT NULL,
   email VARCHAR(30) NOT NULL UNIQUE,
