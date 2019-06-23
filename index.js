@@ -1,20 +1,37 @@
 const express = require("express");
 const redis = require('redis');
-const client = redis.createClient();
+const redisClient = redis.createClient();
 const pollingRoutes = require('./routes/pollingRoutes');
+const { Pool, Client } = require('pg');
+
+const connectionString = 'postgresql://me:password@localhost:5432/pollredis';
+const pool = new Pool({connectionString})
+
+pool.query('SELECT NOW()', (err, res) => {
+  console.log(err, res)
+  pool.end()
+})
+
+const postgresClient = new Client({connectionString})
+postgresClient.connect()
+
+postgresClient.query('SELECT NOW()', (err, res) => {
+  console.log(err, res)
+  postgresClient.end()
+})
 
 // Create express app
 const app = express();
 const server = require('http').createServer(app);
 
 // Redis setup
-client.on('connect', () => {
+redisClient.on('connect', () => {
   // Clear old memories
-  client.flushall();
+  redisClient.flushall();
   console.log('Redis client connected');
 });
 
-client.on('error', (err) => {
+redisClient.on('error', (err) => {
   console.log('Redis client cannot connect ' + err);
 });
 
