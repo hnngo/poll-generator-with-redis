@@ -2,6 +2,7 @@ const express = require("express");
 const redis = require('redis');
 const redisClient = redis.createClient();
 const pollingRoutes = require('./routes/pollingRoutes');
+const userRoutes = require('./routes/userRoutes');
 require('./models/postgres');
 
 // Create express app
@@ -32,6 +33,7 @@ app.use('/polling', (req, res, next) => {
   res.locals.redisClient = client;
   next();
 }, pollingRoutes);
+app.use('/user', userRoutes);
 
 const port = process.env.PORT || 5000;
 server.listen(port, () => {

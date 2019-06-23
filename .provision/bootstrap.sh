@@ -55,7 +55,7 @@ sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE pollredis TO polladmi
 sudo -u postgres psql -c "CREATE TABLE users (
   userId SERIAL PRIMARY KEY,
   name VARCHAR(30) NOT NULL,
-  email VARCHAR(30) NOT NULL,
+  email VARCHAR(30) NOT NULL UNIQUE,
   password VARCHAR(30) NOT NULL
 );"
 

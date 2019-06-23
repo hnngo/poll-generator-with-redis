@@ -4,27 +4,21 @@ const connectionString = 'postgresql://polladmin:password@localhost:5432/pollred
 // Create new Pool
 const pool = new Pool({ connectionString });
 
+pool.query('SELECT NOW()', (err, res) => {
+  if (!err) console.log("Connected to pollredis database from user polladmin");
+});
 
 module.exports = {
+  // Constants
+  userTable: {
+    TBL_NAME: "users",
+    ATTR_EMAIL: "email",
+    ATTR_NAME: "name",
+    ATTR_PASSWORD: "password",
+  },
+
+  // Functions
   query: (text, params, callback) => {
     return pool.query(text, params, callback);
   }
 };
-
-pool.query('SELECT NOW()', (err, res) => {
-  console.log(err, res);
-});
-
-
-pool.query('SELECT NOW()', (err, res) => {
-  console.log(err, res)
-});
-
-
-// const postgresClient = new Client({ connectionString })
-// postgresClient.connect()
-
-// postgresClient.query('SELECT NOW()', (err, res) => {
-//   console.log(err, res)
-//   postgresClient.end()
-// });
