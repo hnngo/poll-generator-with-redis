@@ -1,39 +1,40 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Field, reduxForm } from 'redux-form';
 import { connect } from 'react-redux';
 import InputField from './InputField';
-// import ErrorMsg from './ErrorMsg';
+import ErrorMsg from './ErrorMsg';
 import valid from './validate';
+import { TAB_SIGN_IN, TAB_CURRENT_POLL } from '../../constants';
 import {
   actSignUpWithEmailAndPassword
 } from '../../actions';
 
 const SignUpForm = (props) => {
-  // const { clearErrMsg } = props;
-  // useEffect(() => {
-  //   clearErrMsg();
-  // }, [clearErrMsg]);
+  const { user, onSelectTab } = props;
 
-  const renderLoading = () => {
-    if (props.isLoading) {
-      return (
-        <div className="form-loading">
-          <div className="spinner-container">
-            <div className="spinner-grow" role="status">
-              <span className="sr-only">Loading...</span>
-            </div>
-            <div className="spinner-grow" role="status">
-              <span className="sr-only">Loading...</span>
-            </div>
-            <div className="spinner-grow" role="status">
-              <span className="sr-only">Loading...</span>
-            </div>
-          </div>
-        </div>
-      );
-    } else {
-      return <div />;
+  useEffect(() => {
+    if (user.auth) {
+      onSelectTab(TAB_CURRENT_POLL);
     }
+  }, [user.auth, onSelectTab]);
+
+  const renderButton = () => {
+    // Check if render loading button or normal button
+    if (!props.user.isProcessingAuth) {
+      return (
+        <button type="submit" className="btn-main-orange">
+          Sign Up
+        </button>
+      );
+    }
+
+    return (
+      <button className="btn-main-orange" type="submit" disabled>
+        <span className="spinner-grow spinner-grow-sm px-1" />
+        <span className="spinner-grow spinner-grow-sm px-1" />
+        <span className="spinner-grow spinner-grow-sm px-1" />
+      </button>
+    );
   }
 
   return (
@@ -88,37 +89,29 @@ const SignUpForm = (props) => {
               />
             </div>
           </div>
-          {/* <ErrorMsg /> */}
-          <button type="submit" className="btn-main-orange">
-            Sign Up
-          </button>
+          <ErrorMsg />
+          {renderButton()}
           <div
             className="auth-switch"
-          // onClick={() => props.handleSwitchForm(SIGN_UP_FORM)}
+            onClick={() => props.onSelectTab(TAB_SIGN_IN)}
           >
             Back To Sign In
           </div>
         </form>
-        {renderLoading()}
       </div>
     </div>
   );
 };
 
-// const mapStateToProps = ({form}) => {
-//   if (form.signin) {
-//     return {
-//       formValues: form.signin.values
-//     };
-//   }
+const mapStateToProps = ({ user }) => {
+  return { user };
+}
 
-//   return {};
-// }
 
 export default reduxForm({
   form: 'signup'
 })(
-  connect(null, {
+  connect(mapStateToProps, {
     actSignUpWithEmailAndPassword
   })(SignUpForm)
 );

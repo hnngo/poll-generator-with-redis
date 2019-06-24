@@ -97,7 +97,7 @@ exports.postSignInUserWithEmailAndPassword = (req, res) => {
         acLog(err);
         return res.send({ errMsg: err });
       } else if (result.rowCount === 0) {
-        return res.send({ errMsg: `No existing user ${email}` });
+        return res.send({ errMsg: `User ${email} is not found` });
       }
 
       const existingUser = result.rows[0];
@@ -152,7 +152,7 @@ exports.postSignUpUserWithEmailAndPassword = (req, res) => {
         (err, result) => {
           if (err) {
             acLog(err);
-            return res.send({ errMsg: err });
+            return res.send({ errMsg: `${email} has already been existed` });
           }
 
           // Query new user to return to client
@@ -164,8 +164,11 @@ exports.postSignUpUserWithEmailAndPassword = (req, res) => {
                 acLog(err);
                 return res.send({ errMsg: err });
               }
+              // Store the session
+              req.session.auth = result.rows[0];
 
-              return res.send(result.rows[0])
+              acLog(`Create successfully user ${result.rows[0].email}`);
+              return res.send(result.rows[0]);
             }
           )
         }

@@ -20,7 +20,10 @@ const HeaderLightBar = (props) => {
   if (user.auth) {
     return (
       <div className="header-light-bar">
-        <div onClick={() => { }}>
+        <div
+          className="header-auth-name"
+          onClick={() => { }}
+        >
           {user.auth.name}
         </div>
         <div onClick={() => {

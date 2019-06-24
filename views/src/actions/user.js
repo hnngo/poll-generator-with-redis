@@ -1,12 +1,21 @@
 import axios from 'axios';
 import {
   ACT_FETCH_USER,
-  ACT_SIGNING_UP_USER,
-  ACT_SIGN_UP_USER,
-  ACT_SIGNING_IN_USER,
-  ACT_SIGN_IN_USER,
+  ACT_SIGNING_UP,
+  ACT_SIGN_UP_SUCCESSFULLY,
+  ACT_SIGN_UP_UNSUCCESSFULLY,
+  ACT_SIGNING_IN,
+  ACT_SIGN_IN_SUCCESSFULLY,
+  ACT_SIGN_IN_UNSUCCESSFULLY,
   ACT_SIGN_OUT_USER
 } from '../constants';
+
+const isDataErr = (data) => {
+  return (
+    Object.keys(data).includes("errMsg") ||
+    Object.keys(data).length === 0
+  );
+}
 
 export const actFetchUser = () => {
   return async (dispatch) => {
@@ -27,15 +36,16 @@ export const actSignOut = () => {
 
 export const actSignUpWithEmailAndPassword = (val) => {
   return async (dispatch) => {
-    dispatch({ type: ACT_SIGNING_UP_USER });
+    dispatch({ type: ACT_SIGNING_UP });
 
     try {
       const res = await axios.post('/user/signup', val);
 
+      let type = isDataErr(res.data) ? ACT_SIGN_UP_UNSUCCESSFULLY : ACT_SIGN_UP_SUCCESSFULLY;
       dispatch({
-        type: ACT_SIGN_UP_USER,
+        type,
         payload: res.data
-      })
+      });
     } catch (err) {
       console.log(err);
     }
@@ -44,15 +54,16 @@ export const actSignUpWithEmailAndPassword = (val) => {
 
 export const actSignInpWithEmailAndPassword = (val) => {
   return async (dispatch) => {
-    dispatch({ type: ACT_SIGNING_IN_USER });
+    dispatch({ type: ACT_SIGNING_IN });
 
     try {
       const res = await axios.post('/user/signin', val);
 
+      let type = isDataErr(res.data) ? ACT_SIGN_IN_UNSUCCESSFULLY : ACT_SIGN_IN_SUCCESSFULLY;
       dispatch({
-        type: ACT_SIGN_IN_USER,
+        type,
         payload: res.data
-      })
+      });
     } catch (err) {
       console.log(err);
     }

@@ -1,23 +1,36 @@
 import React from 'react';
+import { connect } from 'react-redux';
 
 const InputField = ({
   input,
   placeholder,
   type,
   icon,
-  meta: { touched, error }
+  meta: { touched, error },
+  user
 }) => {
   const isErr = (touched && error);
 
   return (
     <div className="input-field">
       <i className={icon} />
-      <input
-        {...input}
-        placeholder={placeholder}
-        type={type}
-        className={isErr ? "error-border" : ""}
-      />
+      {
+        user.isProcessingAuth ?
+          <input
+            {...input}
+            placeholder={placeholder}
+            type={type}
+            className={isErr ? "error-border" : ""}
+            disabled
+          />
+          :
+          <input
+            {...input}
+            placeholder={placeholder}
+            type={type}
+            className={isErr ? "error-border" : ""}
+          />
+      }
       <div className="error-text">
         {
           isErr ?
@@ -30,4 +43,8 @@ const InputField = ({
   );
 }
 
-export default InputField;
+const mapStateToProps = ({ user }) => {
+  return { user };
+}
+
+export default connect(mapStateToProps)(InputField);

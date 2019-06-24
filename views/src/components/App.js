@@ -33,9 +33,9 @@ const App = (props) => {
       case TAB_NEW_POLL:
         return <NewPoll />;
       case TAB_SIGN_IN:
-        return <SignInForm />;
+        return <SignInForm onSelectTab={(form) => setViewTab(form)} />;
       case TAB_SIGN_UP:
-        return <SignUpForm />;
+        return <SignUpForm onSelectTab={(form) => setViewTab(form)} />;
       default:
         return <div />;
     }

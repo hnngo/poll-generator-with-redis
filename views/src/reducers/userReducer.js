@@ -1,27 +1,39 @@
 import {
   ACT_FETCH_USER,
-  ACT_SIGN_IN_USER,
-  ACT_SIGN_UP_USER,
+  ACT_SIGN_IN_SUCCESSFULLY,
+  ACT_SIGN_IN_UNSUCCESSFULLY,
+  ACT_SIGNING_IN,
+  ACT_SIGN_UP_SUCCESSFULLY,
+  ACT_SIGN_UP_UNSUCCESSFULLY,
+  ACT_SIGNING_UP,
   ACT_SIGN_OUT_USER
 } from '../constants'
 
 const INITIAL_STATE = {
-  auth: undefined
+  auth: undefined,
+  isProcessingAuth: false,
+  errMsg: ""
 };
 
 export default (state = INITIAL_STATE, action) => {
   switch (action.type) {
+    case "@@redux-form/CHANGE":
+      return { ...state, errMsg: "" };
+    case ACT_SIGNING_IN:
+    case ACT_SIGNING_UP:
+      return { ...state, isProcessingAuth: true, errMsg: "" };
     case ACT_FETCH_USER:
-    case ACT_SIGN_IN_USER:
-    case ACT_SIGN_UP_USER:
-      if (
-        Object.keys(action.payload).includes("errMsg") ||
-        Object.keys(action.payload).length === 0
-      ) {
+      if (!action.payload) {
         return { ...state, auth: null };
       }
 
       return { ...state, auth: action.payload };
+    case ACT_SIGN_IN_UNSUCCESSFULLY:
+    case ACT_SIGN_UP_UNSUCCESSFULLY:
+      return { ...state, ...action.payload, isProcessingAuth: false };
+    case ACT_SIGN_IN_SUCCESSFULLY:
+    case ACT_SIGN_UP_SUCCESSFULLY:
+      return { ...state, auth: action.payload, isProcessingAuth: false };
     case ACT_SIGN_OUT_USER:
       return { ...state, auth: null };
     default:
