@@ -15,7 +15,7 @@ router.get('/:userid', userController.getUserById);
 //  @METHOD   POST
 //  @PATH     /user/signup      
 //  @DESC     Create new user 
-router.post('/signup', userController.postCreateNewUser);
+router.post('/signup', userController.postSignUpUserWithEmailAndPassword);
 
 //  @METHOD   DELETE
 //  @PATH     /user/:userid      

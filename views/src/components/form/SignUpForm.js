@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
 import { Field, reduxForm } from 'redux-form';
+import { connect } from 'react-redux';
 import InputField from './InputField';
 // import ErrorMsg from './ErrorMsg';
-// import valid from './validate';
-// import {
-//   signInWithEmailAndPassword,
-//   clearErrMsg
-// } from '../../actions';
+import valid from './validate';
+import {
+  actSignUpWithEmailAndPassword
+} from '../../actions';
 
 const SignUpForm = (props) => {
   // const { clearErrMsg } = props;
@@ -41,7 +41,7 @@ const SignUpForm = (props) => {
       <div className="container">
         <p className="auth-header">Sign Up</p>
         <form
-          onSubmit={props.handleSubmit((val) => console.log(val))}
+          onSubmit={props.handleSubmit((val) => props.actSignUpWithEmailAndPassword(val))}
         >
           <div className="row">
             <div className="col-3">
@@ -53,7 +53,7 @@ const SignUpForm = (props) => {
                 component={InputField}
                 type="text"
                 placeholder="Nick"
-                // validate={valid.isEmail}
+                validate={valid.isNotNull}
                 icon={"fas fa-envelope"}
               />
             </div>
@@ -68,7 +68,7 @@ const SignUpForm = (props) => {
                 component={InputField}
                 type="email"
                 placeholder="nick@test.com"
-                // validate={valid.isEmail}
+                validate={valid.isEmail}
                 icon={"fas fa-envelope"}
               />
             </div>
@@ -83,7 +83,7 @@ const SignUpForm = (props) => {
                 component={InputField}
                 type="password"
                 placeholder="password"
-                // validate={valid.minLength6}
+                validate={valid.minLength6}
                 icon={"fas fa-key"}
               />
             </div>
@@ -117,4 +117,8 @@ const SignUpForm = (props) => {
 
 export default reduxForm({
   form: 'signup'
-})(SignUpForm);
+})(
+  connect(null, {
+    actSignUpWithEmailAndPassword
+  })(SignUpForm)
+);

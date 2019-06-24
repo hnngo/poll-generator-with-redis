@@ -7,6 +7,8 @@ const InputField = ({
   icon,
   meta: { touched, error }
 }) => {
+  const isErr = (touched && error);
+
   return (
     <div className="input-field">
       <i className={icon} />
@@ -14,10 +16,15 @@ const InputField = ({
         {...input}
         placeholder={placeholder}
         type={type}
+        className={isErr ? "error-border" : ""}
       />
       <div className="error-text">
-        {touched &&
-          ((error && <span>{error}</span>))}
+        {
+          isErr ?
+            <span>{error}</span>
+            :
+            <div />
+        }
       </div>
     </div>
   );

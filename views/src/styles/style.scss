@@ -28,7 +28,8 @@ $theme-colors: (
   "light-bar":        #e6b87c15,
   "dim-black":        #555555,
   "placeholder-bg":   #cab79d6e,
-  "placeholder-text": rgba(185, 184, 184, 0.568)
+  "placeholder-text": rgba(185, 184, 184, 0.568),
+  "danger-text":      rgb(236, 60, 60)
 );
 
 $breakpoints: (
@@ -193,7 +194,11 @@ $breakpoints: (
   padding: 20px 0px;
   @include pos(absolute, $left: 50%);
   transform: translateX(-50%);
-  min-width: 320px;
+  width: 380px;
+
+  @include mq(tablet, max) {
+    width: 340px;
+  }
 
   .auth-header {
     color: map-get($map: $theme-colors, $key: main-orange);
@@ -231,12 +236,25 @@ $breakpoints: (
 .input-field {
   input {
     border: none;
-    background-color: map-get($map: $theme-color, $key: placeholder-bg);
+    outline: none;
+    background-color: map-get($map: $theme-colors, $key: placeholder-bg);
     padding: 5px 0px 5px 10px;
     border-radius: 10px;
+    width: 100%;
 
     &::placeholder {
       color: map-get($map: $theme-colors, $key: placeholder-text);
     }
+  }
+
+  .error-border {
+    border: 1px solid map-get($map: $theme-colors, $key: danger-text);
+  }
+
+  .error-text {
+    color: map-get($map: $theme-colors, $key: danger-text);
+    font-size: 14px;
+    padding-left: 8px;
+    text-align: left;
   }
 }

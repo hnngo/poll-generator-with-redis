@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Field, reduxForm } from 'redux-form';
 import InputField from './InputField';
 // import ErrorMsg from './ErrorMsg';
-// import valid from './validate';
+import valid from './validate';
 // import {
 //   signInWithEmailAndPassword,
 //   clearErrMsg
@@ -48,7 +48,7 @@ const SignInForm = (props) => {
                 component={InputField}
                 type="email"
                 placeholder="nick@test.com"
-                // validate={valid.isEmail}
+                validate={valid.isEmail}
                 icon={"fas fa-envelope"}
               />
             </div>
@@ -63,7 +63,7 @@ const SignInForm = (props) => {
                 component={InputField}
                 type="password"
                 placeholder="password"
-                // validate={valid.minLength6}
+                validate={valid.minLength6}
                 icon={"fas fa-key"}
               />
             </div>

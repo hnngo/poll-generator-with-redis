@@ -1,6 +1,7 @@
 const acLog = require('../utils/acLog');
 const db = require('../models/postgres');
 
+// Prepare constant
 const {
   TBL_NAME: USER_TABLE,
   ATTR_EMAIL,
@@ -8,6 +9,7 @@ const {
   ATTR_PASSWORD,
   ATTR_USERID
 } = db.userTable;
+const ALL_ATTR_EXCEPT_PWD = `${ATTR_USERID}, ${ATTR_EMAIL}, ${ATTR_NAME}`;
 
 //  @METHOD   GET
 //  @PATH     /user/get-all-users      
@@ -55,7 +57,7 @@ exports.getUserById = (req, res) => {
 //  @METHOD   POST
 //  @PATH     /auth/signup      
 //  @DESC     Create new user
-exports.postCreateNewUser = (req, res) => {
+exports.postSignUpUserWithEmailAndPassword = (req, res) => {
   const {
     name,
     email,
@@ -78,7 +80,19 @@ exports.postCreateNewUser = (req, res) => {
         return res.send({ errMsg: err });
       }
 
-      return res.send(result)
+      // Query new user to return to client
+      db.query(
+        `SELECT ${ALL_ATTR_EXCEPT_PWD} FROM ${USER_TABLE} WHERE ${ATTR_EMAIL} = $1`,
+        [email],
+        (err, result) => {
+          if (err) {
+            acLog(err);
+            return res.send({ errMsg: err });
+          }
+
+          return res.send(result.rows[0])
+        }
+      )
     }
   );
 };

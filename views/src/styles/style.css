@@ -174,7 +174,13 @@ code {
   left: 50%;
   -webkit-transform: translateX(-50%);
           transform: translateX(-50%);
-  min-width: 320px;
+  width: 380px;
+}
+
+@media only screen and (max-width: 767px) {
+  .auth-form-container {
+    width: 340px;
+  }
 }
 
 .auth-form-container .auth-header {
@@ -209,9 +215,11 @@ code {
 
 .input-field input {
   border: none;
+  outline: none;
   background-color: #cab79d6e;
   padding: 5px 0px 5px 10px;
   border-radius: 10px;
+  width: 100%;
 }
 
 .input-field input::-webkit-input-placeholder {
@@ -228,5 +236,16 @@ code {
 
 .input-field input::placeholder {
   color: rgba(185, 184, 184, 0.568);
+}
+
+.input-field .error-border {
+  border: 1px solid #ec3c3c;
+}
+
+.input-field .error-text {
+  color: #ec3c3c;
+  font-size: 14px;
+  padding-left: 8px;
+  text-align: left;
 }
 /*# sourceMappingURL=style.css.map */
