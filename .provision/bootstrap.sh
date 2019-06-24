@@ -49,13 +49,16 @@ sudo locale-gen en_US.UTF-8
 sudo cp /vagrant/.provision/postgresql/.pgpass ~/.pgpass
 sudo chmod 0600 ~/.pgpass
 sudo -u postgres psql -c "CREATE ROLE polladmin WITH LOGIN PASSWORD 'password';"
-sudo -u postgres psql -c "ALTER ROLE polladmin CREATEDB;"
+sudo -u postgres psql -c "ALTER ROLE polladmin SUPERUSER;"
 sudo -u postgres psql -c "CREATE DATABASE pollredis;"
 sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE pollredis TO polladmin;"
 
+# Add UUID lib generator
+psql -U polladmin pollredis -h localhost -c "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";"
+
 # Create table user
 psql -U polladmin pollredis -h localhost -c "CREATE TABLE users (
-  userId SERIAL PRIMARY KEY,
+  userId UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name VARCHAR(30) NOT NULL,
   email VARCHAR(30) NOT NULL UNIQUE,
   password VARCHAR(30) NOT NULL
