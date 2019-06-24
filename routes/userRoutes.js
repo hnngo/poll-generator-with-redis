@@ -8,9 +8,14 @@ const userController = require('../controllers/userController');
 router.get('/get-all-users', userController.getAllUsers);
 
 //  @METHOD   GET
-//  @PATH     /user/:userid
+//  @PATH     /user/current
 //  @DESC     Get all current users
-router.get('/:userid', userController.getUserById);
+router.get('/current', userController.getCurrentUser);
+
+//  @METHOD   GET
+//  @PATH     /user/logout
+//  @DESC     Get all current users
+router.get('/logout', userController.getLogout);
 
 //  @METHOD   POST
 //  @PATH     /user/signin      
@@ -21,6 +26,11 @@ router.post('/signin', userController.postSignInUserWithEmailAndPassword);
 //  @PATH     /user/signup      
 //  @DESC     Create new user 
 router.post('/signup', userController.postSignUpUserWithEmailAndPassword);
+
+//  @METHOD   GET
+//  @PATH     /user/:userid
+//  @DESC     Get all current users
+router.get('/:userid', userController.getUserById);
 
 //  @METHOD   DELETE
 //  @PATH     /user/:userid      

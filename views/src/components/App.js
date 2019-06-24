@@ -18,7 +18,6 @@ import HeaderLightBar from './HeaderLightBar';
 
 const App = (props) => {
   const [viewTab, setViewTab] = useState(TAB_CURRENT_POLL);
-  const [viewAuth, setViewAuth] = useState(false);
 
   // Connect socketio
   useEffect(() => {
@@ -30,7 +29,7 @@ const App = (props) => {
   const renderContent = () => {
     switch (viewTab) {
       case TAB_CURRENT_POLL:
-        return <CurrentPolls/>;
+        return <CurrentPolls />;
       case TAB_NEW_POLL:
         return <NewPoll />;
       case TAB_SIGN_IN:
@@ -45,21 +44,15 @@ const App = (props) => {
   return (
     <div className="app-container">
       <HeaderLightBar
-        onSelect={(tab) => {
-          setViewTab(tab);
-          setViewAuth(true);
-        }}
+        onSelect={(tab) => setViewTab(tab)}
       />
       <div className="app-header">
         <p>Poll Generator</p>
       </div>
       <div className="app-nav-btn">
         <NavButtons
-          onSelect={(tab) => {
-            setViewTab(tab);
-            setViewAuth(false);
-          }}
-          nonSelect={viewAuth}
+          onSelect={(tab) => setViewTab(tab)}
+          selectedTab={viewTab}
         />
       </div>
       <div className="app-cross-line" />

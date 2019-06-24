@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
 import {
   TAB_CURRENT_POLL,
   TAB_NEW_POLL,
@@ -6,12 +7,28 @@ import {
 } from '../constants';
 
 const NavButtons = (props) => {
-  const { nonSelect } = props;
-  const [viewTab, setViewTab] = useState(TAB_CURRENT_POLL);
+  const { selectedTab } = props;
+  const [viewTab, setViewTab] = useState(selectedTab);
 
   useEffect(() => {
-    if (nonSelect) setViewTab(false);
-  }, [nonSelect])
+    setViewTab(selectedTab)
+  }, [selectedTab]);
+
+  const renderYourPolls = () => {
+    if (props.user.auth) {
+      return (
+        <div
+          className={viewTab === TAB_YOUR_POLLS ? "tab-active" : "tab-inactive"}
+          onClick={() => {
+            setViewTab(TAB_YOUR_POLLS);
+            props.onSelect(TAB_YOUR_POLLS);
+          }}
+        >
+          Your Polls
+      </div>
+      );
+    }
+  }
 
   return (
     <div className="nav-btn-container">
@@ -33,17 +50,13 @@ const NavButtons = (props) => {
       >
         Create New Poll
       </div>
-      <div
-        className={viewTab === TAB_YOUR_POLLS ? "tab-active" : "tab-inactive"}
-        onClick={() => {
-          setViewTab(TAB_YOUR_POLLS);
-          props.onSelect(TAB_YOUR_POLLS);
-        }}
-      >
-        Your Polls
-      </div>
+      {renderYourPolls()}
     </div>
   );
 };
 
-export default NavButtons;
+const mapStateToProps = ({ user }) => {
+  return { user };
+}
+
+export default connect(mapStateToProps)(NavButtons);

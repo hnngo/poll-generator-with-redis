@@ -9,7 +9,9 @@ export const TAB_SIGN_UP = "TAB_SIGN_UP";
 export const TYPE_INPUT_NUMBER = "TYPE_INPUT_NUMBER";
 
 // ACTIONS - USER
+export const ACT_FETCH_USER = "ACT_FETCH_USER";
 export const ACT_SIGNING_UP_USER = "ACT_SIGNING_UP_USER";
 export const ACT_SIGN_UP_USER = "ACT_SIGN_UP_USER";
 export const ACT_SIGNING_IN_USER = "ACT_SIGNING_IN_USER";
 export const ACT_SIGN_IN_USER = "ACT_SIGN_IN_USER";
+export const ACT_SIGN_OUT_USER = "ACT_SIGN_OUT_USER";

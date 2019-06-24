@@ -16,6 +16,7 @@ const ALL_ATTR_EXCEPT_PWD = `${ATTR_USERID}, ${ATTR_EMAIL}, ${ATTR_NAME}`;
 //  @PATH     /user/get-all-users      
 //  @DESC     Get all current users
 exports.getAllUsers = (req, res) => {
+  console.log(req.session)
   db.query(
     `SELECT * FROM ${USER_TABLE}`,
     (err, result) => {
@@ -27,6 +28,13 @@ exports.getAllUsers = (req, res) => {
       return res.send(result);
     }
   )
+};
+
+//  @METHOD   GET
+//  @PATH     /user/current
+//  @DESC     Get current users
+exports.getCurrentUser = (req, res) => {
+  return res.send(req.session.auth);
 };
 
 //  @METHOD   GET
@@ -53,6 +61,16 @@ exports.getUserById = (req, res) => {
       return res.send(result);
     }
   )
+};
+
+//  @METHOD   GET
+//  @PATH     /user/logout
+//  @DESC     Log out
+exports.getLogout = (req, res) => {
+  if (req.session.auth) {
+    req.session.destroy();
+    return res.send();
+  }
 };
 
 //  @METHOD   POST
@@ -82,6 +100,8 @@ exports.postSignInUserWithEmailAndPassword = (req, res) => {
         return res.send({ errMsg: `No existing user ${email}` });
       }
 
+      const existingUser = result.rows[0];
+
       bcrypt.compare(password, existingUser.password, (err, isMatch) => {
         if (err) throw err;
         if (!isMatch) {
@@ -89,16 +109,18 @@ exports.postSignInUserWithEmailAndPassword = (req, res) => {
           return res.send({ errMsg: "Password is incorrect" })
         }
 
-        // Store the session
-        req.session.userid = existingUser.userid;
-
-        // Return the value
-        acLog(`${existingUser.email} login successfully`);
-        return res.send({
+        const userInfo = {
           userid: existingUser.userid,
           name: existingUser.name,
           email: existingUser.email
-        });
+        };
+
+        // Store the session
+        req.session.auth = userInfo;
+
+        // Return the value
+        acLog(`${existingUser.email} login successfully`);
+        return res.send(userInfo);
       })
     }
   );
