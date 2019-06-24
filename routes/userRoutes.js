@@ -13,6 +13,11 @@ router.get('/get-all-users', userController.getAllUsers);
 router.get('/:userid', userController.getUserById);
 
 //  @METHOD   POST
+//  @PATH     /user/signin      
+//  @DESC     Sign in 
+router.post('/signin', userController.postSignInUserWithEmailAndPassword);
+
+//  @METHOD   POST
 //  @PATH     /user/signup      
 //  @DESC     Create new user 
 router.post('/signup', userController.postSignUpUserWithEmailAndPassword);

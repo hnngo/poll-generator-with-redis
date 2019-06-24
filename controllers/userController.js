@@ -1,7 +1,8 @@
 const acLog = require('../utils/acLog');
 const db = require('../models/postgres');
+const bcrypt = require('bcrypt');
 
-// Prepare constant
+// Prepare Attributes Constant
 const {
   TBL_NAME: USER_TABLE,
   ATTR_EMAIL,
@@ -55,7 +56,56 @@ exports.getUserById = (req, res) => {
 };
 
 //  @METHOD   POST
-//  @PATH     /auth/signup      
+//  @PATH     /user/signin      
+//  @DESC     Sign in user
+exports.postSignInUserWithEmailAndPassword = (req, res) => {
+  const {
+    email,
+    password
+  } = req.body;
+
+  // Check if missing any information
+  if (!email || !password) {
+    acLog("Missing information");
+    return res.send({ errMsg: "Missing information" });
+  }
+
+  // Query existing user to return to client
+  db.query(
+    `SELECT * FROM ${USER_TABLE} WHERE ${ATTR_EMAIL} = $1`,
+    [email],
+    (err, result) => {
+      if (err) {
+        acLog(err);
+        return res.send({ errMsg: err });
+      } else if (result.rowCount === 0) {
+        return res.send({ errMsg: `No existing user ${email}` });
+      }
+
+      bcrypt.compare(password, existingUser.password, (err, isMatch) => {
+        if (err) throw err;
+        if (!isMatch) {
+          acLog(`${existingUser.email} login with wrong password`);
+          return res.send({ errMsg: "Password is incorrect" })
+        }
+
+        // Store the session
+        req.session.userid = existingUser.userid;
+
+        // Return the value
+        acLog(`${existingUser.email} login successfully`);
+        return res.send({
+          userid: existingUser.userid,
+          name: existingUser.name,
+          email: existingUser.email
+        });
+      })
+    }
+  );
+};
+
+//  @METHOD   POST
+//  @PATH     /user/signup      
 //  @DESC     Create new user
 exports.postSignUpUserWithEmailAndPassword = (req, res) => {
   const {
@@ -70,31 +120,36 @@ exports.postSignUpUserWithEmailAndPassword = (req, res) => {
     return res.send({ errMsg: "Missing information" });
   }
 
-  // Create new user
-  db.query(
-    `INSERT INTO ${USER_TABLE} (${ATTR_NAME}, ${ATTR_EMAIL}, ${ATTR_PASSWORD}) VALUES ($1, $2, $3)`,
-    [name, email, password],
-    (err, result) => {
-      if (err) {
-        acLog(err);
-        return res.send({ errMsg: err });
-      }
-
-      // Query new user to return to client
+  // Encrypt password
+  bcrypt.genSalt(10, (err, salt) => {
+    bcrypt.hash(password, salt, (err, hashPwd) => {
+      // Create new user
       db.query(
-        `SELECT ${ALL_ATTR_EXCEPT_PWD} FROM ${USER_TABLE} WHERE ${ATTR_EMAIL} = $1`,
-        [email],
+        `INSERT INTO ${USER_TABLE} (${ATTR_NAME}, ${ATTR_EMAIL}, ${ATTR_PASSWORD}) VALUES ($1, $2, $3)`,
+        [name, email, hashPwd],
         (err, result) => {
           if (err) {
             acLog(err);
             return res.send({ errMsg: err });
           }
 
-          return res.send(result.rows[0])
+          // Query new user to return to client
+          db.query(
+            `SELECT ${ALL_ATTR_EXCEPT_PWD} FROM ${USER_TABLE} WHERE ${ATTR_EMAIL} = $1`,
+            [email],
+            (err, result) => {
+              if (err) {
+                acLog(err);
+                return res.send({ errMsg: err });
+              }
+
+              return res.send(result.rows[0])
+            }
+          )
         }
-      )
-    }
-  );
+      );
+    })
+  });
 };
 
 //  @METHOD   DELETE

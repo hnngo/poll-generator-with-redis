@@ -1,5 +1,5 @@
 {
-  "name": "simple-node-with-nginx",
+  "name": "polling-with-redis",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -12,8 +12,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^3.0.6",
     "concurrently": "^4.1.0",
+    "connect-redis": "^3.4.1",
     "express": "^4.17.1",
+    "express-session": "^1.16.2",
     "lodash": "^4.17.11",
     "nodemon": "^1.19.1",
     "pg": "^7.11.0",

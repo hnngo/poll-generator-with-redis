@@ -1,8 +1,11 @@
 const express = require("express");
+const session = require("express-session");
 const redis = require('redis');
 const redisClient = redis.createClient();
 const pollingRoutes = require('./routes/pollingRoutes');
 const userRoutes = require('./routes/userRoutes');
+const keys = require('./config/keys');
+const redisStore = require('connect-redis')(session);
 require('./models/postgres');
 
 // Create express app
@@ -24,6 +27,19 @@ redisClient.on('error', (err) => {
 require('./services/socketio')(server);
 
 // Express middlewares
+app.use(session({
+  secret: keys.sessionKey,
+  name: '_redisStore',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false },
+  store: new redisStore({
+    host: 'localhost',
+    port: 6379,
+    client: redisClient,
+    ttl: 6 * 60 * 60
+  })
+}));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 

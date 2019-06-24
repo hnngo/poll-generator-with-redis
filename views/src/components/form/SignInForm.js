@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
 import { Field, reduxForm } from 'redux-form';
+import { connect } from 'react-redux';
 import InputField from './InputField';
 // import ErrorMsg from './ErrorMsg';
 import valid from './validate';
-// import {
-//   signInWithEmailAndPassword,
-//   clearErrMsg
-// } from '../../actions';
+import {
+  actSignInpWithEmailAndPassword
+} from '../../actions';
 
 const SignInForm = (props) => {
   const renderLoading = () => {
@@ -36,7 +36,7 @@ const SignInForm = (props) => {
       <div className="container">
         <p className="auth-header">Sign In</p>
         <form
-          onSubmit={props.handleSubmit((val) => console.log(val))}
+          onSubmit={props.handleSubmit((val) => props.actSignInpWithEmailAndPassword(val))}
         >
           <div className="row">
             <div className="col-3">
@@ -97,4 +97,8 @@ const SignInForm = (props) => {
 
 export default reduxForm({
   form: 'signin'
-})(SignInForm);
+})(
+  connect(null, {
+    actSignInpWithEmailAndPassword
+  })(SignInForm)
+);
