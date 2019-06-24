@@ -6,6 +6,7 @@ const pollingRoutes = require('./routes/pollingRoutes');
 const userRoutes = require('./routes/userRoutes');
 const keys = require('./config/keys');
 const redisStore = require('connect-redis')(session);
+const acLog = require('./utils/acLog');
 require('./models/postgres');
 
 // Create express app
@@ -16,11 +17,11 @@ const server = require('http').createServer(app);
 redisClient.on('connect', () => {
   // Clear old memories
   redisClient.flushall();
-  console.log('Redis client connected');
+  acLog('Redis client connected');
 });
 
 redisClient.on('error', (err) => {
-  console.log('Redis client cannot connect ' + err);
+  acLog('Redis client cannot connect ' + err);
 });
 
 // Socketio setuo
@@ -53,5 +54,5 @@ app.use('/user', userRoutes);
 
 const port = process.env.PORT || 5000;
 server.listen(port, () => {
-  console.log(`Node app listening on http://localhost:${port}`);
+  acLog(`Node app listening on http://localhost:${port}`);
 });

@@ -14,10 +14,21 @@ const NavButtons = (props) => {
     setViewTab(selectedTab)
   }, [selectedTab]);
 
-  const renderYourPolls = () => {
+  const renderAuthRequiredNav = () => {
     if (props.user.auth) {
-      return (
+      return [
         <div
+          key={TAB_NEW_POLL}
+          className={viewTab === TAB_NEW_POLL ? "tab-active" : "tab-inactive"}
+          onClick={() => {
+            setViewTab(TAB_NEW_POLL);
+            props.onSelect(TAB_NEW_POLL);
+          }}
+        >
+          Create New Poll
+        </div>,
+        <div
+          key={TAB_YOUR_POLLS}
           className={viewTab === TAB_YOUR_POLLS ? "tab-active" : "tab-inactive"}
           onClick={() => {
             setViewTab(TAB_YOUR_POLLS);
@@ -26,7 +37,7 @@ const NavButtons = (props) => {
         >
           Your Polls
       </div>
-      );
+      ];
     }
   }
 
@@ -41,16 +52,7 @@ const NavButtons = (props) => {
       >
         Current Polls
       </div>
-      <div
-        className={viewTab === TAB_NEW_POLL ? "tab-active" : "tab-inactive"}
-        onClick={() => {
-          setViewTab(TAB_NEW_POLL);
-          props.onSelect(TAB_NEW_POLL);
-        }}
-      >
-        Create New Poll
-      </div>
-      {renderYourPolls()}
+      {renderAuthRequiredNav()}
     </div>
   );
 };

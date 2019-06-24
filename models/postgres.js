@@ -1,11 +1,12 @@
-const { Pool, Client } = require('pg');
+const { Pool } = require('pg');
+const acLog = require('../utils/acLog');
 const connectionString = 'postgresql://polladmin:password@localhost:5432/pollredis';
 
 // Create new Pool
 const pool = new Pool({ connectionString });
 
 pool.query('SELECT NOW()', (err, res) => {
-  if (!err) console.log("Connected to pollredis database from user polladmin");
+  if (!err) acLog("Connected to pollredis database from user polladmin");
 });
 
 module.exports = {
