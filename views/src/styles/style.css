@@ -6,13 +6,8 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
 .app-container {
@@ -32,6 +27,7 @@ code {
   -webkit-box-direction: normal;
       -ms-flex-direction: column;
           flex-direction: column;
+  overflow-y: auto;
 }
 
 .app-container .header-light-bar {
@@ -65,16 +61,21 @@ code {
 }
 
 .app-container .header-light-bar .header-auth-name {
-  font-weight: bold;
-  color: #e6b87c;
   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+  color: #e6b87c;
+  font-size: 1rem;
+  font-weight: bold;
+  font-style: normal;
+  letter-spacing: unset;
 }
 
 .app-container .app-header {
-  font-size: 3.5rem;
   font-family: 'Courier New', Courier, monospace;
-  font-weight: bold;
   color: #e6b87c;
+  font-size: 3.5rem;
+  font-weight: bold;
+  font-style: normal;
+  letter-spacing: unset;
   padding-top: 20px;
 }
 
@@ -98,6 +99,10 @@ code {
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
   margin-bottom: 10px;
 }
 
@@ -110,15 +115,16 @@ code {
 }
 
 .nav-btn-container div {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
   color: #aaaaaa;
+  font-size: 18px;
+  font-weight: bold;
+  font-style: normal;
+  letter-spacing: 1px;
   margin: 10px 20px;
   padding: 5px 0px;
-  font-size: 18px;
   cursor: pointer;
   position: relative;
-  font-weight: bold;
-  letter-spacing: 1px;
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
 .nav-btn-container div::before {
@@ -190,8 +196,12 @@ code {
 }
 
 .auth-form-container .auth-header {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   color: #e6b87c;
-  font-size: 20px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  font-style: unset;
+  letter-spacing: 1px;
 }
 
 .auth-form-container form .row {
@@ -218,9 +228,13 @@ code {
 }
 
 .auth-form-container form .auth-switch {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   color: #dfdfdf;
-  margin-top: 30px;
   font-size: 14px;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: unset;
+  margin-top: 30px;
   cursor: pointer;
 }
 
@@ -254,9 +268,97 @@ code {
 }
 
 .input-field .error-text {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   color: #ec3c3c;
   font-size: 14px;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: unset;
   padding-left: 8px;
   text-align: left;
+}
+
+.new-poll-container {
+  margin: 20px;
+  text-align: left;
+}
+
+.new-poll-container .np-header {
+  color: #dfdfdf;
+}
+
+.poll-setting-form {
+  background-color: #d8b18252;
+  width: 100%;
+  padding: 20px;
+  border-radius: 20px;
+}
+
+@media only screen and (min-width: 768px) {
+  .poll-setting-form {
+    padding: 20px 40px;
+    width: 80%;
+    position: relative;
+    top: unset;
+    right: unset;
+    bottom: unset;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+            transform: translateX(-50%);
+  }
+}
+
+.poll-setting-form .poll-question p {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  color: #e6b87c;
+  font-size: 1.8rem;
+  font-weight: bold;
+  font-style: normal;
+  letter-spacing: unset;
+}
+
+.poll-setting-form .poll-question .input-field {
+  margin-bottom: 20px;
+}
+
+.poll-setting-form .poll-options .option-func {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  -webkit-box-align: unset;
+      -ms-flex-align: unset;
+          align-items: unset;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+}
+
+.poll-setting-form .poll-options .option-func .header-text {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  color: #d8b18294;
+  font-size: 1.2rem;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: unset;
+}
+
+.poll-setting-form .poll-options .option-func .btn-main-orange {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  color: #555555;
+  font-size: 12px;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: unset;
+  padding: 3px 10px;
+  height: 25px;
+  cursor: pointer;
+}
+
+.poll-setting-form .poll-options .input-field {
+  margin-bottom: 8px;
 }
 /*# sourceMappingURL=style.css.map */

@@ -7,7 +7,8 @@ const InputField = ({
   type,
   icon,
   meta: { touched, error },
-  user
+  user,
+  autocomplete
 }) => {
   const isErr = (touched && error);
 
@@ -22,6 +23,7 @@ const InputField = ({
             type={type}
             className={isErr ? "error-border" : ""}
             disabled
+            autoComplete={autocomplete}
           />
           :
           <input
@@ -29,6 +31,7 @@ const InputField = ({
             placeholder={placeholder}
             type={type}
             className={isErr ? "error-border" : ""}
+            autoComplete={autocomplete}
           />
       }
       <div className="error-text">

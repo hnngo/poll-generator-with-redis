@@ -5,24 +5,18 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
-}
-
 $theme-colors: (
+  "main-bg":          #282c34,
   "off-white":        #dfdfdf,
   "disabled-text":    #aaaaaa,
   "dark-orange":      #e0662e,
   "main-orange":      #e6b87c,
   "dim-orange":       #d8b18294,
+  "trans-orange":     #d8b18252,
   "shadow-orange":    #e7c89f,
   "shadow-dark":      #333333,
   "light-bar":        #e6b87c15,
@@ -39,6 +33,38 @@ $breakpoints: (
   "desktop":      1200px,
   "desktop-wide": 1440px
 );
+
+// Font family
+@mixin fontFam ($type: default) {
+  @if $type == default {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  } @else if $type == lucida {
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+  } @else if $type == courier {
+    font-family: 'Courier New', Courier, monospace;
+  } @else if $type == verdana {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+  }
+}
+
+// Font style
+@mixin fontSetting ($fontFam: default, $fontSize: 16px, $fontColor: white, $fontWeight: 400, $fontStyle: normal, $letterSpacing: unset) {
+  // Font family
+  @include fontFam($fontFam);
+
+  // Color
+  @if map-has-key($map: $theme-colors, $key: $fontColor) {
+    color: map-get($map: $theme-colors, $key: $fontColor);
+  } @else {
+    color: $fontColor;
+  }
+
+  // Font Size, Weight, Style and letter spacing
+  font-size: $fontSize;
+  font-weight: $fontWeight;
+  font-style: $fontStyle;
+  letter-spacing: $letterSpacing;
+}
 
 // Media querries
 @mixin mq($width, $type: min) {
@@ -75,9 +101,10 @@ $breakpoints: (
 
 .app-container {
   text-align: center;
-  background-color: #282c34;
+  background-color: map-get($map: $theme-colors, $key: main-bg);
   height: 100vh;
   @include display(flex, unset, center, column);
+  overflow-y: auto;
 
   .header-light-bar {
     width: 100%;
@@ -97,17 +124,12 @@ $breakpoints: (
     }
 
     .header-auth-name {
-      font-weight: bold;
-      color: map-get($map: $theme-colors, $key: main-orange);
-      font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+      @include fontSetting(lucida, 1rem, main-orange, bold);
     }
   }
 
   .app-header {
-    font-size: 3.5rem;
-    font-family: 'Courier New', Courier, monospace;
-    font-weight: bold;
-    color: map-get($map: $theme-colors, $key: main-orange);
+    @include fontSetting(courier, 3.5rem, main-orange, bold);
     padding-top: 20px;
   }
 
@@ -123,9 +145,7 @@ $breakpoints: (
 }
 
 .nav-btn-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  @include display(flex, center, center);
   margin-bottom: 10px;
 
   .tab-active {
@@ -137,15 +157,11 @@ $breakpoints: (
   }
 
   div {
-    color: map-get($map: $theme-colors, $key: disabled-text);
+    @include fontSetting(verdana, 18px, disabled-text, bold, normal, 1px);
     margin: 10px 20px;
     padding: 5px 0px;
-    font-size: 18px;
     cursor: pointer;
     position: relative;
-    font-weight: bold;
-    letter-spacing: 1px;
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
 
     &::before {
       position: absolute;
@@ -207,8 +223,7 @@ $breakpoints: (
   }
 
   .auth-header {
-    color: map-get($map: $theme-colors, $key: main-orange);
-    font-size: 20px;
+    @include fontSetting(default, 1.5rem, main-orange, bold, unset, 1px);
   }
 
   form {
@@ -236,9 +251,8 @@ $breakpoints: (
     }
 
     .auth-switch {
-      color: map-get($map: $theme-colors, $key: off-white);
+      @include fontSetting(default, 14px, off-white);
       margin-top: 30px;
-      font-size: 14px;
       cursor: pointer;
     }
   }
@@ -263,9 +277,62 @@ $breakpoints: (
   }
 
   .error-text {
-    color: map-get($map: $theme-colors, $key: danger-text);
-    font-size: 14px;
+    @include fontSetting(default, 14px, danger-text);
     padding-left: 8px;
     text-align: left;
+  }
+}
+
+.new-poll-container {
+  margin: 20px;
+  text-align: left;
+
+  .np-header {
+    color: map-get($map: $theme-colors, $key: off-white);
+  }
+}
+
+.poll-setting-form {
+  background-color: map-get($map: $theme-colors, $key: trans-orange);
+  width: 100%;
+  padding: 20px;
+  border-radius: 20px;
+
+  @include mq(tablet, min) {
+    padding: 20px 40px;
+    width: 80%;
+    @include pos(relative, $left: 50%);
+    transform: translateX(-50%);
+  }
+
+  .poll-question {
+    p {
+      @include fontSetting(verdana, 1.8rem, main-orange, bold);
+    }
+
+    .input-field {
+      margin-bottom: 20px;
+    }
+  }
+
+  .poll-options {
+    .option-func {
+      @include display(flex, space-between);
+
+      .header-text {
+        @include fontSetting(verdana, 1.2rem, dim-orange);
+      }
+
+      .btn-main-orange {
+        @include fontSetting(default, 12px, dim-black);
+        padding: 3px 10px;
+        height: 25px;
+        cursor: pointer;
+      }
+    }
+
+    .input-field {
+      margin-bottom: 8px;
+    }
   }
 }

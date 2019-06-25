@@ -61,12 +61,14 @@ psql -U polladmin pollredis -h localhost -c "CREATE TABLE users (
   userId UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name VARCHAR(30) NOT NULL,
   email VARCHAR(30) NOT NULL UNIQUE,
-  password VARCHAR(30) NOT NULL
+  password VARCHAR(100) NOT NULL
 );"
 
+# Rebuild the bycript
+npm install bcrypt --prefix /vagrant/
+
 # Run the server
-# cd /vagrant/ 
-# sudo node index.js
+# npm run vagrant --prefix /vagrant/
 
 # Run postgresql in vagrant
 # sudo su - postgres
