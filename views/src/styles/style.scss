@@ -23,7 +23,8 @@ $theme-colors: (
   "dim-black":        #555555,
   "placeholder-bg":   #cab79d6e,
   "placeholder-text": rgba(185, 184, 184, 0.568),
-  "danger-text":      rgb(236, 60, 60)
+  "danger-text":      rgb(236, 60, 60),
+  "shadow-danger":    rgb(121, 46, 46),
 );
 
 $breakpoints: (
@@ -133,14 +134,18 @@ $breakpoints: (
     padding-top: 20px;
   }
 
-  .app-cross-line {
-    width: 70vw;
-    height: 2px;
-    background-color: map-get($map: $theme-colors, $key: dim-orange);
-  }
-
   .app-content {
     width: 100%;
+    position: relative;
+
+    &::before {
+      content: "";
+      @include pos(absolute, 0px, $left: 50%);
+      height: 2px;
+      width: 70vw;
+      transform: translateX(-50%);
+      background-color: map-get($map: $theme-colors, $key: dim-orange);
+    }
   }
 }
 
@@ -193,14 +198,13 @@ $breakpoints: (
   }
 }
 
+.btn-main-danger,
 .btn-main-orange {
   padding: 10px 20px;
   border-radius: 10px;
-  background-color: map-get($map: $theme-colors, $key: main-orange);
-  color: map-get($map: $theme-colors, $key: dim-black);
   border: none;
   outline: none!important;
-  box-shadow: 0px 0px 4px 0px map-get($map: $theme-colors, $key: shadow-orange);
+  cursor: pointer;
   
   &:active {
     box-shadow: inset 0px 0px 4px 0px map-get($map: $theme-colors, $key: shadow-dark);
@@ -210,6 +214,18 @@ $breakpoints: (
     border: none;
     background: none;
   }
+}
+
+.btn-main-orange {
+  background-color: map-get($map: $theme-colors, $key: main-orange);
+  box-shadow: 0px 0px 4px 0px map-get($map: $theme-colors, $key: shadow-orange);
+  color: map-get($map: $theme-colors, $key: dim-black);
+}
+
+.btn-main-danger {
+  background-color: map-get($map: $theme-colors, $key: danger-text);
+  box-shadow: 0px 0px 4px 0px map-get($map: $theme-colors, $key: shadow-danger);
+  color: map-get($map: $theme-colors, $key: off-white);
 }
 
 .auth-form-container {
@@ -286,13 +302,10 @@ $breakpoints: (
 .new-poll-container {
   margin: 20px;
   text-align: left;
-
-  .np-header {
-    color: map-get($map: $theme-colors, $key: off-white);
-  }
 }
 
 .poll-setting-form {
+  position: relative;
   background-color: map-get($map: $theme-colors, $key: trans-orange);
   width: 100%;
   padding: 20px;
@@ -320,7 +333,7 @@ $breakpoints: (
       @include display(flex, space-between);
 
       .header-text {
-        @include fontSetting(verdana, 1.2rem, dim-orange);
+        @include fontSetting(verdana, 1.2rem, main-orange);
       }
 
       .btn-main-orange {
@@ -333,6 +346,39 @@ $breakpoints: (
 
     .input-field {
       margin-bottom: 8px;
+    }
+  }
+
+  .poll-setting {
+    margin-top: 20px;
+
+    .setting-header {
+      @include fontSetting(verdana, 1.2rem, main-orange);
+    }
+
+    .set-public,
+    .set-mutiple-choice {
+      @include display(flex, space-between);
+
+      p {
+        @include fontSetting(default, 1rem, off-white, 400, italic);
+      }
+    }
+  }
+
+  .poll-btn {
+    @include display(flex, flex-end);
+    margin-top: 10px;
+
+    .btn-main-orange {
+      margin: 0px 10px;
+      height: 35px;
+      padding: 0 20px;
+    }
+
+    .btn-main-danger {
+      height: 35px;
+      padding: 5px 20px;
     }
   }
 }

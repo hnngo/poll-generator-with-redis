@@ -55,7 +55,6 @@ const App = (props) => {
           selectedTab={viewTab}
         />
       </div>
-      <div className="app-cross-line" />
       <div className="app-content">
         {renderContent()}
       </div>
