@@ -19,6 +19,7 @@ const PollCard = (props) => {
     <div className="poll-card-container">
       <div className="poll-question">
         {poll.poll_id}
+        {poll.question}
       </div>
       <div className="poll-options">
         {renderOptions()}

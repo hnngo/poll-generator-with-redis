@@ -31,13 +31,14 @@ module.exports = {
 
   pollAnswerTable: {
     TBL_NAME: "poll_answers",
+    ATTR_POLLANS_ID: "pollanswer_id",
     ATTR_POLLID: "poll_id",
     ATTR_USERID: "user_id",
     ATTR_ANSWER_INDEX: "answer_index"
   },
 
   // Functions
-  query: (text, params, callback) => {
-    return pool.query(text, params, callback);
+  query: (text, params) => {
+    return pool.query(text, params);
   }
 };

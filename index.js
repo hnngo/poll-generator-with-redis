@@ -2,6 +2,7 @@ const express = require("express");
 const session = require("express-session");
 const redis = require('redis');
 const redisClient = redis.createClient();
+const redisSync = require('./services/redisSync');
 const pollRoutes = require('./routes/pollRoutes');
 const userRoutes = require('./routes/userRoutes');
 const keys = require('./config/keys');
@@ -52,6 +53,10 @@ app.use('/pollser', (req, res, next) => {
 }, pollRoutes);
 app.use('/user', userRoutes);
 
+// Redis synchronize with Postgres
+redisSync(redisClient);
+
+// App listen to a port
 const port = process.env.PORT || 5000;
 server.listen(port, () => {
   acLog(`Node app listening on http://localhost:${port}`);

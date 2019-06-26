@@ -13,7 +13,7 @@ const {
 const {
   TBL_NAME: POLL_TABLE,
   ATTR_POLLID: POLL_POLLID,
-  ATTR_USERID: POLL_USERID,   
+  ATTR_USERID: POLL_USERID,
   ATTR_QUESTION: POLL_QUESTION,
   ATTR_OPTIONS: POLL_OPTIONS,
   ATTR_DATE_CREATED: POLL_DATE_CREATED,
@@ -23,7 +23,7 @@ const {
 //  @METHOD   POST
 //  @PATH     /pollser/create      
 //  @DESC     Start the polling with predefined setting
-exports.postCreatePoll = (req, res) => {
+exports.postCreatePoll = async (req, res) => {
   const { redisClient } = res.locals;
   const { userid } = req.session.auth;
   const {
@@ -51,94 +51,81 @@ exports.postCreatePoll = (req, res) => {
     //PENDING: Check fields
     pollSettings.startingScores = optionalStartingScores;
   } else {
-    pollSettings.startingScores = new Array(question.length).fill(0);;
+    pollSettings.startingScores = new Array(question.length).fill(0);
   }
 
-  console.log(pollSettings);
-  console.log(userid);
-
   // Store in postgres
-  db.query(
-    `INSERT INTO ${POLL_TABLE} (${POLL_USERID}, ${POLL_QUESTION}, ${POLL_OPTIONS}) VALUES ($1, $2, $3) RETURNING *`,
-    [userid, pollSettings.question, pollSettings.options],
-    (err, result) => {
-      if (err) {
-        acLog(err);
-        return res.send({ errMsg: err });
+  try {
+    const { rows } = await db.query(
+      `INSERT INTO ${POLL_TABLE} (${POLL_USERID}, ${POLL_QUESTION}, ${POLL_OPTIONS}) VALUES ($1, $2, $3) RETURNING *`,
+      [userid, pollSettings.question, pollSettings.options]
+    );
+
+    // Store in redis server
+    const redisPollSet = 'poll-' + rows[0][POLL_POLLID];
+    const args = _.flatten(_.zip(pollSettings.startingScores, pollSettings.options));
+    args.unshift(redisPollSet);
+
+    redisClient.exists(redisPollSet, (isExisted) => {
+      if (!isExisted) {
+        redisClient.zadd(args, (err) => {
+          if (err) throw err;
+        });
       }
+    });
 
-      acLog(result.rows[0]);
-      return res.send(result.rows[0]);
-    }
-  )
+    acLog(rows[0]);
+    return res.send(rows[0]);
 
-  // Store in redis server
-  // const args = _.flatten(_.zip(pollSettings.startingScores, pollSettings.options));
-  // args.unshift('question');
+  } catch (err) {
+    acLog(err);
+    return res.send({ errMsg: err });
+  }
 
-  // Add to redis
-  // redisClient.zadd(args, function (err, response) {
-  //   if (err) throw err;
-  //   console.log('Added ' + response + ' items.');
 
-  //   // -Infinity and +Infinity also work
-  //   var args1 = ['leaderboard', '+inf', '-inf', 'WITHSCORES'];
-  //   redisClient.zrevrangebyscore(args1, function (err, response) {
-  //     if (err) throw err;
-  //     console.log('example1', response);
-
-  //     res.send(response)
-  //     // write your code here
-  //   });
-
-  //   // var max = 3, min = 1, offset = 1, count = 2;
-  //   // var args2 = ['leaderboard', max, min, 'WITHSCORES', 'LIMIT', offset, count];
-  //   // redisClient.zrevrangebyscore(args2, function (err, response) {
-  //   //   if (err) throw err;
-  //   //   console.log('example2', response);
-  //   //   // write your code here
-  //   // });
-  // });
+  // db.query(
+  //   `INSERT INTO ${POLL_TABLE} (${POLL_USERID}, ${POLL_QUESTION}, ${POLL_OPTIONS}) VALUES ($1, $2, $3) RETURNING *`,
+  //   [userid, pollSettings.question, pollSettings.options],
+  //   (err, result) => {
+  //     if (err) {
+  //       acLog(err);
+  //       return res.send({ errMsg: err });
+  //     }
+  //   }
+  // )
 };
 
 //  @METHOD   GET
 //  @PATH     /pollser/all      
 //  @DESC     Get all current poll
-exports.getAllPoll = (req, res) => {
-  db.query(
-    `SELECT * FROM ${POLL_TABLE}`,
-    (err, result) => {
-      if (err) {
-        acLog(err);
-        return res.send({ errMsg: err });
-      }
+exports.getAllPoll = async (req, res) => {
+  try {
+    const { rows } = await db.query(`SELECT * FROM ${POLL_TABLE}`);
 
-      return res.send(result.rows);
-    }
-  )
+    return res.send(rows);
+  } catch (err) {
+    acLog(err);
+    return res.send({ errMsg: err });
+  }
 }
 
 //  @METHOD   GET
 //  @PATH     /pollser/:pollid      
 //  @DESC     Get poll by poll id
-exports.getPollById = (req, res) => {
+exports.getPollById = async (req, res) => {
   const { pollid } = req.params;
 
   if (!pollid) {
     acLog("Missing information");
     return res.json({ message: "Missing information" });
-  } 
+  }
 
-  db.query(
-    `SELECT * FROM ${POLL_TABLE} WHERE ${POLL_POLLID} = $1`,
-    [pollid],
-    (err, result) => {
-      if (err) {
-        acLog(err);
-        return res.send({ errMsg: err });
-      }
-      
-      return res.send(result.rows[0]);
-    }
-  )
+  try {
+    const { rows } = await db.query(`SELECT * FROM ${POLL_TABLE} WHERE ${POLL_POLLID} = $1`, [pollid]);
+
+    return res.send(rows[0]);
+  } catch (err) {
+    acLog(err);
+    return res.send({ errMsg: err });
+  }
 }
