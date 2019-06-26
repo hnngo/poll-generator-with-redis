@@ -14,6 +14,10 @@ const SignInForm = (props) => {
   const { user, onSelectTab, actClearAuthErrorMsg } = props;
 
   useEffect(() => {
+    //DEBUG
+    props.actSignInpWithEmailAndPassword({ email: 'nick@test.com', password: 'test123'});
+    //DEBUG
+
     // Clear err msg if exist
     actClearAuthErrorMsg();
 

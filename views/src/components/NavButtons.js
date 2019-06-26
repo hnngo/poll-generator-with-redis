@@ -15,8 +15,8 @@ const NavButtons = (props) => {
   }, [selectedTab]);
 
   const renderAuthRequiredNav = () => {
-    // if (props.user.auth) {
-    if (true) {
+    if (props.user.auth) {
+    // if (true) {
       return [
         <div
           key={TAB_NEW_POLL}

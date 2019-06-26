@@ -1,44 +1,46 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import SettingRow from './SettingRow';
+import React, { useEffect } from 'react';
+import { connect } from 'react-redux';
+import {
+  actFetchAllPoll
+} from '../../actions';
+import PollCard from './PollCard';
 
 const ExamplePolling = (props) => {
-  const [selections, setSelections] = useState(1);
+  const { actFetchAllPoll, poll } = props;
 
-  const handleClickStart = () => {
-    axios.post("/polling/create", {
-      question: "Asdfsdfs",
-      numberOfSlections: 3
-    });
+  // Fetch all polls
+  useEffect(() => {
+    actFetchAllPoll();
+  }, [actFetchAllPoll])
+
+  const renderPollCards = () => {
+    if (!poll.allPolls.length) {
+      return <div />;
+    }
+
+    return poll.allPolls.map((poll, i) => {
+      return (
+        <PollCard
+          key={i}
+          poll={poll}
+        />
+      )
+    })
   }
 
   return (
     <div className="polling-containter">
       <div className="container">
-        <div className="row">
-          <div className="col-sm-6">
-            <div className="polling-btn-start">
-              <button
-                className="btn-main-orange"
-                onClick={() => handleClickStart()}
-              >
-                Start
-              </button>
-            </div>
-            <SettingRow
-              type="input"
-              placholder={1}
-              label="Number of selections"
-              onSelect={(e) => setSelections(e)}
-            />
-          </div>
-          <div className="col-sm-6">
-            Res
-        </div>
-        </div>
+        {renderPollCards()}
       </div>
     </div>
   );
 };
 
-export default ExamplePolling;
+const mapStateToProps = ({ poll }) => {
+  return { poll };
+}
+
+export default connect(mapStateToProps, {
+  actFetchAllPoll
+})(ExamplePolling);

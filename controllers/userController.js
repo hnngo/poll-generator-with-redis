@@ -16,7 +16,6 @@ const ALL_ATTR_EXCEPT_PWD = `${ATTR_USERID}, ${ATTR_EMAIL}, ${ATTR_NAME}`;
 //  @PATH     /user/get-all-users      
 //  @DESC     Get all current users
 exports.getAllUsers = (req, res) => {
-  console.log(req.session)
   db.query(
     `SELECT * FROM ${USER_TABLE}`,
     (err, result) => {
@@ -110,9 +109,9 @@ exports.postSignInUserWithEmailAndPassword = (req, res) => {
         }
 
         const userInfo = {
-          userid: existingUser.userid,
-          name: existingUser.name,
-          email: existingUser.email
+          userid: existingUser[ATTR_USERID],
+          name: existingUser[ATTR_NAME],
+          email: existingUser[ATTR_EMAIL]
         };
 
         // Store the session

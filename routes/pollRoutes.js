@@ -16,4 +16,14 @@ function guidGenerator() {
 //  @DESC     Start the polling with predefined setting
 router.post('/create', isLogin, pollController.postCreatePoll);
 
+//  @METHOD   GET
+//  @PATH     /pollser/all      
+//  @DESC     Get all current poll
+router.get('/all', pollController.getAllPoll);
+
+//  @METHOD   GET
+//  @PATH     /pollser/:pollid      
+//  @DESC     Get poll by poll id
+router.get('/:pollid', pollController.getPollById);
+
 module.exports = router;

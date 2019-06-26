@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const acLog = require('../utils/acLog');
 const db = require('../models/postgres');
 
 const {
@@ -24,12 +25,13 @@ const {
 //  @DESC     Start the polling with predefined setting
 exports.postCreatePoll = (req, res) => {
   const { redisClient } = res.locals;
+  const { userid } = req.session.auth;
   const {
     question,
     options,
     optionalStartingScores
   } = req.body;
-  console.log(req.body);
+
   // Check requirement
   if (!question.length || options.length <= 1) {
     console.log("Invalid polling information");
@@ -49,42 +51,94 @@ exports.postCreatePoll = (req, res) => {
     //PENDING: Check fields
     pollSettings.startingScores = optionalStartingScores;
   } else {
-    pollSettings.startingScores = new Array(optins.length).fill(0);;
+    pollSettings.startingScores = new Array(question.length).fill(0);;
   }
 
   console.log(pollSettings);
+  console.log(userid);
 
   // Store in postgres
-  // db.query(
-  //   `INSERT INTO ${POLL_TABLE} (${POLL_USERID}, ${POLL_QUESTION}, ${POLL_OPTIONS})
-  //   VALUES ('8ffbe4cd-361d-4c73-9b08-c3a31bd83c31', 'What is your favorite color?', '{"red", "blue", "green"}');`
-  // )
+  db.query(
+    `INSERT INTO ${POLL_TABLE} (${POLL_USERID}, ${POLL_QUESTION}, ${POLL_OPTIONS}) VALUES ($1, $2, $3) RETURNING *`,
+    [userid, pollSettings.question, pollSettings.options],
+    (err, result) => {
+      if (err) {
+        acLog(err);
+        return res.send({ errMsg: err });
+      }
+
+      acLog(result.rows[0]);
+      return res.send(result.rows[0]);
+    }
+  )
 
   // Store in redis server
-  const args = _.flatten(_.zip(pollSettings.startingScores, pollSettings.options));
-  args.unshift('question');
+  // const args = _.flatten(_.zip(pollSettings.startingScores, pollSettings.options));
+  // args.unshift('question');
 
   // Add to redis
-  redisClient.zadd(args, function (err, response) {
-    if (err) throw err;
-    console.log('Added ' + response + ' items.');
+  // redisClient.zadd(args, function (err, response) {
+  //   if (err) throw err;
+  //   console.log('Added ' + response + ' items.');
 
-    // -Infinity and +Infinity also work
-    var args1 = ['leaderboard', '+inf', '-inf', 'WITHSCORES'];
-    redisClient.zrevrangebyscore(args1, function (err, response) {
-      if (err) throw err;
-      console.log('example1', response);
+  //   // -Infinity and +Infinity also work
+  //   var args1 = ['leaderboard', '+inf', '-inf', 'WITHSCORES'];
+  //   redisClient.zrevrangebyscore(args1, function (err, response) {
+  //     if (err) throw err;
+  //     console.log('example1', response);
 
-      res.send(response)
-      // write your code here
-    });
+  //     res.send(response)
+  //     // write your code here
+  //   });
 
-    // var max = 3, min = 1, offset = 1, count = 2;
-    // var args2 = ['leaderboard', max, min, 'WITHSCORES', 'LIMIT', offset, count];
-    // redisClient.zrevrangebyscore(args2, function (err, response) {
-    //   if (err) throw err;
-    //   console.log('example2', response);
-    //   // write your code here
-    // });
-  });
+  //   // var max = 3, min = 1, offset = 1, count = 2;
+  //   // var args2 = ['leaderboard', max, min, 'WITHSCORES', 'LIMIT', offset, count];
+  //   // redisClient.zrevrangebyscore(args2, function (err, response) {
+  //   //   if (err) throw err;
+  //   //   console.log('example2', response);
+  //   //   // write your code here
+  //   // });
+  // });
 };
+
+//  @METHOD   GET
+//  @PATH     /pollser/all      
+//  @DESC     Get all current poll
+exports.getAllPoll = (req, res) => {
+  db.query(
+    `SELECT * FROM ${POLL_TABLE}`,
+    (err, result) => {
+      if (err) {
+        acLog(err);
+        return res.send({ errMsg: err });
+      }
+
+      return res.send(result.rows);
+    }
+  )
+}
+
+//  @METHOD   GET
+//  @PATH     /pollser/:pollid      
+//  @DESC     Get poll by poll id
+exports.getPollById = (req, res) => {
+  const { pollid } = req.params;
+
+  if (!pollid) {
+    acLog("Missing information");
+    return res.json({ message: "Missing information" });
+  } 
+
+  db.query(
+    `SELECT * FROM ${POLL_TABLE} WHERE ${POLL_POLLID} = $1`,
+    [pollid],
+    (err, result) => {
+      if (err) {
+        acLog(err);
+        return res.send({ errMsg: err });
+      }
+      
+      return res.send(result.rows[0]);
+    }
+  )
+}
