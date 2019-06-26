@@ -19,6 +19,23 @@ module.exports = {
     ATTR_PASSWORD: "password",
   },
 
+  pollTable: {
+    TBL_NAME: "polls",
+    ATTR_POLLID: "poll_id",
+    ATTR_USERID: "user_id",
+    ATTR_QUESTION: "question",
+    ATTR_OPTIONS: "options",
+    ATTR_DATE_CREATED: "date_created",
+    ATTR_LAST_UPDATED: "last_updated",
+  },
+
+  pollAnswerTable: {
+    TBL_NAME: "poll_answers",
+    ATTR_POLLID: "poll_id",
+    ATTR_USERID: "user_id",
+    ATTR_ANSWER_INDEX: "answer_index"
+  },
+
   // Functions
   query: (text, params, callback) => {
     return pool.query(text, params, callback);

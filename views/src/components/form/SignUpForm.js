@@ -6,17 +6,21 @@ import ErrorMsg from './ErrorMsg';
 import valid from './validate';
 import { TAB_SIGN_IN, TAB_CURRENT_POLL } from '../../constants';
 import {
-  actSignUpWithEmailAndPassword
+  actSignUpWithEmailAndPassword,
+  actClearAuthErrorMsg
 } from '../../actions';
 
 const SignUpForm = (props) => {
-  const { user, onSelectTab } = props;
+  const { user, onSelectTab, actClearAuthErrorMsg } = props;
 
   useEffect(() => {
+    // Clear err msg if exist
+    actClearAuthErrorMsg();
+    
     if (user.auth) {
       onSelectTab(TAB_CURRENT_POLL);
     }
-  }, [user.auth, onSelectTab]);
+  }, [user.auth, onSelectTab, actClearAuthErrorMsg]);
 
   const renderButton = () => {
     // Check if render loading button or normal button
@@ -112,6 +116,7 @@ export default reduxForm({
   form: 'signup'
 })(
   connect(mapStateToProps, {
-    actSignUpWithEmailAndPassword
+    actSignUpWithEmailAndPassword,
+    actClearAuthErrorMsg
   })(SignUpForm)
 );

@@ -3,24 +3,16 @@ import { reduxForm, Field, change, reset } from 'redux-form';
 import { connect } from 'react-redux';
 import InputField from './InputField';
 import SwitchField from './SwitchField';
+import {
+  actCreatePoll
+} from '../../actions';
 
-const PollSettingForm = (props) => {
-  const { formValues, initialize } = props;
+const NewPollForm = (props) => {
+  const { formValues } = props;
   const [numberOfOption, setNumberOfOption] = useState(2);
 
   useEffect(() => {
     console.log(formValues);
-
-    // Initial value
-    // if (initialize) {
-    //   initialize({
-    //     question: "",
-    //     option1: "",
-    //     option2: "",
-    //     privatePoll: false,
-    //     multipleChoice: false
-    //   });
-    // }
 
     // Check if option
     if (formValues) {
@@ -63,7 +55,7 @@ const PollSettingForm = (props) => {
   return (
     <div className="poll-setting-form">
       <form
-        onSubmit={props.handleSubmit((e) => console.log(e))}
+        onSubmit={props.handleSubmit((e) => props.actCreatePoll(e))}
       >
         <div className="poll-question">
           <p> Your Question</p>
@@ -136,6 +128,22 @@ const PollSettingForm = (props) => {
   );
 };
 
+const validate = values => {
+  const errors = {};
+
+  const optionKeys = Object.keys(values).filter(d => d.startsWith('option'));
+  const numberOfOption = optionKeys.length;
+  optionKeys.forEach((o, i) => {
+    if (i !== numberOfOption - 1 || numberOfOption <= 2) {
+      if (!values[o]) {
+        errors[o] = "Please fill in this option";
+      }
+    }
+  });
+  
+  return errors
+} 
+
 
 const mapStateToProps = ({ form }) => {
   if (form.newPoll) {
@@ -151,11 +159,14 @@ export default reduxForm({
   form: 'newPoll',
   initialValues: {
     question: "",
+    option0: "",
     option1: "",
-    option2: "",
     privatePoll: false,
     multipleChoice: false
-  }
+  },
+  validate
 })(
-  connect(mapStateToProps)(PollSettingForm)
+  connect(mapStateToProps, {
+    actCreatePoll
+  })(NewPollForm)
 );

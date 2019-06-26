@@ -7,7 +7,8 @@ import {
   ACT_SIGNING_IN,
   ACT_SIGN_IN_SUCCESSFULLY,
   ACT_SIGN_IN_UNSUCCESSFULLY,
-  ACT_SIGN_OUT_USER
+  ACT_SIGN_OUT_USER,
+  ACT_CLEAR_AUTH_ERR_MSG
 } from '../constants';
 
 const isDataErr = (data) => {
@@ -67,5 +68,9 @@ export const actSignInpWithEmailAndPassword = (val) => {
     } catch (err) {
       console.log(err);
     }
-  }
+  };
+};
+
+export const actClearAuthErrorMsg = () => {
+  return { type: ACT_CLEAR_AUTH_ERR_MSG };
 };

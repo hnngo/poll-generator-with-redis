@@ -6,7 +6,8 @@ import {
   ACT_SIGN_UP_SUCCESSFULLY,
   ACT_SIGN_UP_UNSUCCESSFULLY,
   ACT_SIGNING_UP,
-  ACT_SIGN_OUT_USER
+  ACT_SIGN_OUT_USER,
+  ACT_CLEAR_AUTH_ERR_MSG
 } from '../constants'
 
 const INITIAL_STATE = {
@@ -36,6 +37,8 @@ export default (state = INITIAL_STATE, action) => {
       return { ...state, auth: action.payload, isProcessingAuth: false };
     case ACT_SIGN_OUT_USER:
       return { ...state, auth: null };
+    case ACT_CLEAR_AUTH_ERR_MSG:
+      return { ...state, errMsg: "" };
     default:
       return state;
   }

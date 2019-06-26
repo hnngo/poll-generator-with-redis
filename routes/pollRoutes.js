@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
+const { isLogin } = require('../utils/requiredMiddleware');
 const pollController = require('../controllers/pollController');
+
 
 function guidGenerator() {
   var S4 = function() {
@@ -12,6 +14,6 @@ function guidGenerator() {
 //  @METHOD   POST
 //  @PATH     /pollser/create      
 //  @DESC     Start the polling with predefined setting
-router.post('/create', pollController.postCreatePoll);
+router.post('/create', isLogin, pollController.postCreatePoll);
 
 module.exports = router;

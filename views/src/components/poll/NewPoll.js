@@ -1,11 +1,11 @@
 import React from 'react';
-import PollSettingForm from '../form/PollSettingForm';
+import NewPollForm from '../form/NewPollForm';
 
 const NewPolling = (props) => {
   return (
     <div className="new-poll-container">
       <div className="container">
-        <PollSettingForm />
+        <NewPollForm />
       </div>
     </div>
   );
