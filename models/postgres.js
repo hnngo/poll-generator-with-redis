@@ -13,7 +13,7 @@ module.exports = {
   // Constants
   userTable: {
     TBL_NAME: "users",
-    ATTR_USERID: "userid",
+    ATTR_USERID: "user_id",
     ATTR_EMAIL: "email",
     ATTR_NAME: "name",
     ATTR_PASSWORD: "password",

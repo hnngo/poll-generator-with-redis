@@ -58,14 +58,35 @@ psql -U polladmin pollredis -h localhost -c "CREATE EXTENSION IF NOT EXISTS \"uu
 
 # Create table user
 psql -U polladmin pollredis -h localhost -c "CREATE TABLE users (
-  userId UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name VARCHAR(30) NOT NULL,
   email VARCHAR(30) NOT NULL UNIQUE,
   password VARCHAR(100) NOT NULL
 );"
 
+# Create table poll
+psql -U polladmin pollredis -h localhost -c "CREATE TABLE polls (
+  poll_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL,
+  question VARCHAR(255) NOT NULL,
+  options text[] NOT NULL,
+  date_created TIMESTAMP DEFAULT NOW(),
+  last_updated TIMESTAMP DEFAULT NOW(),
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);"
+
+psql -U polladmin pollredis -h localhost -c "CREATE TABLE poll_answers (
+  pollanswer_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  poll_id UUID NOT NULL,
+  user_id UUID NOT NULL,
+  answer_index SMALLINT,
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+  FOREIGN KEY (poll_id) REFERENCES polls(poll_id) ON DELETE CASCADE
+);"
+
 # Rebuild the bycript
-npm install bcrypt --prefix /vagrant/
+cd /vagrant/
+npm install --save bcrypt
 
 # Run the server
 # npm run vagrant --prefix /vagrant/

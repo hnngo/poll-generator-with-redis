@@ -2,7 +2,7 @@ const express = require("express");
 const session = require("express-session");
 const redis = require('redis');
 const redisClient = redis.createClient();
-const pollingRoutes = require('./routes/pollingRoutes');
+const pollRoutes = require('./routes/pollRoutes');
 const userRoutes = require('./routes/userRoutes');
 const keys = require('./config/keys');
 const redisStore = require('connect-redis')(session);
@@ -45,11 +45,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // Express init routes
-app.use('/polling', (req, res, next) => {
+app.use('/pollser', (req, res, next) => {
   // Passing redis client through middlewares
-  res.locals.redisClient = client;
+  res.locals.redisClient = redisClient;
   next();
-}, pollingRoutes);
+}, pollRoutes);
 app.use('/user', userRoutes);
 
 const port = process.env.PORT || 5000;
