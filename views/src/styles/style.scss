@@ -384,7 +384,45 @@ $breakpoints: (
 }
 
 .poll-card-container {
-  background-color: #b39f498c;
+  @include pos(relative, $left: 50%);
+  transform: translateX(-50%);
+  background-color: map-get($map: $theme-colors, $key: shadow-orange);
+  max-width: 800px;
   margin: 20px;
   border-radius: 20px;
+  box-shadow: 1px 1px 3px 0px map-get($map: $theme-colors, $key: off-white);
+
+  .poll-question {
+    @include fontSetting(default, 1.5rem, dim-black, bold);
+    text-align: left;
+    padding: 10px 0px 10px 20px;
+  }
+
+  .poll-options {
+    @include fontSetting(default, 1rem, dim-black);
+    text-align: left;
+    padding: 0px 0px 10px 20px;
+
+    ul {
+      list-style: circle;
+
+      li {
+        margin-left: 30px;
+      }
+    }
+  }
+
+  .poll-info {
+    @include display(flex, space-between);
+    padding: 10px 20px;
+
+    .poll-user-created {
+      @include fontSetting(default, 1rem, dim-black, 400, italic);
+      @include display(flex);
+    }
+
+    .poll-updated-time {
+      @include fontSetting(default, 1rem, dim-black);     
+    }
+  }
 }

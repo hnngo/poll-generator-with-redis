@@ -451,8 +451,96 @@ body {
 }
 
 .poll-card-container {
-  background-color: #b39f498c;
+  position: relative;
+  top: unset;
+  right: unset;
+  bottom: unset;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+          transform: translateX(-50%);
+  background-color: #e7c89f;
+  max-width: 800px;
   margin: 20px;
   border-radius: 20px;
+  -webkit-box-shadow: 1px 1px 3px 0px #dfdfdf;
+          box-shadow: 1px 1px 3px 0px #dfdfdf;
+}
+
+.poll-card-container .poll-question {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  color: #555555;
+  font-size: 1.5rem;
+  font-weight: bold;
+  font-style: normal;
+  letter-spacing: unset;
+  text-align: left;
+  padding: 10px 0px 10px 20px;
+}
+
+.poll-card-container .poll-options {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  color: #555555;
+  font-size: 1rem;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: unset;
+  text-align: left;
+  padding: 0px 0px 10px 20px;
+}
+
+.poll-card-container .poll-options ul {
+  list-style: circle;
+}
+
+.poll-card-container .poll-options ul li {
+  margin-left: 30px;
+}
+
+.poll-card-container .poll-info {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  -webkit-box-align: unset;
+      -ms-flex-align: unset;
+          align-items: unset;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  padding: 10px 20px;
+}
+
+.poll-card-container .poll-info .poll-user-created {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  color: #555555;
+  font-size: 1rem;
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: unset;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: unset;
+      -ms-flex-pack: unset;
+          justify-content: unset;
+  -webkit-box-align: unset;
+      -ms-flex-align: unset;
+          align-items: unset;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+}
+
+.poll-card-container .poll-info .poll-updated-time {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  color: #555555;
+  font-size: 1rem;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: unset;
 }
 /*# sourceMappingURL=style.css.map */

@@ -18,20 +18,24 @@ const PollCard = (props) => {
   return (
     <div className="poll-card-container">
       <div className="poll-question">
-        {poll.poll_id}
+        {/* {poll.poll_id} */}
         {poll.question}
       </div>
       <div className="poll-options">
-        {renderOptions()}
+        <ul>
+          {renderOptions()}
+        </ul>
       </div>
-      <div className="poll-user-create">
-        Created by {poll.user_id}
-      </div>
-      <div className="poll-time">
-        <div className="created-time">
-          Created 3 days ago
+      <div className="poll-info">
+        <div className="poll-user-created">
+          <div className="user-name">
+            Created by {poll.name} - 
+          </div>
+          <div className="created-time">
+            Created 3 days ago
+          </div>
         </div>
-        <div className="updated-time">
+        <div className="poll-updated-time">
           Last updated 10 minutes ago
         </div>
       </div>
