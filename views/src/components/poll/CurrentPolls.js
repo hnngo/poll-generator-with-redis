@@ -7,7 +7,7 @@ import PollCard from './PollCard';
 
 const ExamplePolling = (props) => {
   const { actFetchAllPoll, poll } = props;
-
+  console.log(props.poll);
   // Fetch all polls
   useEffect(() => {
     actFetchAllPoll();

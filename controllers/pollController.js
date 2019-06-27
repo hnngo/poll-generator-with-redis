@@ -20,6 +20,8 @@ const {
   ATTR_LAST_UPDATED: POLL_LAST_UPDATED
 } = db.pollTable;
 
+const POLL_ALL_RELATED_ATTR = `${POLL_POLLID}, ${POLL_TABLE}.${POLL_USERID}, ${POLL_QUESTION}, ${POLL_OPTIONS}, ${POLL_DATE_CREATED}, ${POLL_LAST_UPDATED}, ${USER_NAME}, ${USER_EMAIL}`;
+
 //  @METHOD   POST
 //  @PATH     /pollser/create      
 //  @DESC     Start the polling with predefined setting
@@ -81,18 +83,6 @@ exports.postCreatePoll = async (req, res) => {
     acLog(err);
     return res.send({ errMsg: err });
   }
-
-
-  // db.query(
-  //   `INSERT INTO ${POLL_TABLE} (${POLL_USERID}, ${POLL_QUESTION}, ${POLL_OPTIONS}) VALUES ($1, $2, $3) RETURNING *`,
-  //   [userid, pollSettings.question, pollSettings.options],
-  //   (err, result) => {
-  //     if (err) {
-  //       acLog(err);
-  //       return res.send({ errMsg: err });
-  //     }
-  //   }
-  // )
 };
 
 //  @METHOD   GET
@@ -100,7 +90,11 @@ exports.postCreatePoll = async (req, res) => {
 //  @DESC     Get all current poll
 exports.getAllPoll = async (req, res) => {
   try {
-    const { rows } = await db.query(`SELECT * FROM ${POLL_TABLE}`);
+    const { rows } = await db.query(`
+    SELECT ${POLL_ALL_RELATED_ATTR}
+    FROM ${POLL_TABLE}
+    INNER JOIN ${USER_TABLE}
+    ON ${POLL_TABLE}.${POLL_USERID} = ${USER_TABLE}.${USER_USERID};`);
 
     return res.send(rows);
   } catch (err) {
@@ -121,7 +115,13 @@ exports.getPollById = async (req, res) => {
   }
 
   try {
-    const { rows } = await db.query(`SELECT * FROM ${POLL_TABLE} WHERE ${POLL_POLLID} = $1`, [pollid]);
+    const { rows } = await db.query(`
+    SELECT ${POLL_ALL_RELATED_ATTR}
+    FROM ${POLL_TABLE}
+    INNER JOIN ${USER_TABLE}
+    ON ${POLL_TABLE}.${POLL_USERID} = ${USER_TABLE}.${USER_USERID}
+    WHERE ${POLL_POLLID} = $1;`,
+    [pollid]);
 
     return res.send(rows[0]);
   } catch (err) {
