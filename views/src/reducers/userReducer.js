@@ -13,7 +13,8 @@ import {
 const INITIAL_STATE = {
   auth: undefined,
   isProcessingAuth: false,
-  errMsg: ""
+  errMsg: "",
+  votedPoll: {}
 };
 
 export default (state = INITIAL_STATE, action) => {

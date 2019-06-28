@@ -15,18 +15,15 @@ const ALL_ATTR_EXCEPT_PWD = `${ATTR_USERID}, ${ATTR_EMAIL}, ${ATTR_NAME}`;
 //  @METHOD   GET
 //  @PATH     /user/get-all-users      
 //  @DESC     Get all current users
-exports.getAllUsers = (req, res) => {
-  db.query(
-    `SELECT * FROM ${USER_TABLE}`,
-    (err, result) => {
-      if (err) {
-        acLog(err);
-        return res.send({ errMsg: err });
-      }
+exports.getAllUsers = async (req, res) => {
+  try {
+    const { rows } = await db.query(`SELECT * FROM ${USER_TABLE}`);
 
-      return res.send(result);
-    }
-  )
+    return res.send(rows);
+  } catch (err) {
+    acLog(err);
+    return res.send({ errMsg: err });
+  }
 };
 
 //  @METHOD   GET
@@ -39,7 +36,7 @@ exports.getCurrentUser = (req, res) => {
 //  @METHOD   GET
 //  @PATH     /user/:userid
 //  @DESC     Get all current users
-exports.getUserById = (req, res) => {
+exports.getUserById = async (req, res) => {
   const { userid } = req.params;
 
   // Check if missing any information
@@ -48,18 +45,17 @@ exports.getUserById = (req, res) => {
     return res.send({ errMsg: "Missing information" });
   }
 
-  db.query(
-    `SELECT * FROM ${USER_TABLE} WHERE ${ATTR_USERID} = $1`,
-    [userid],
-    (err, result) => {
-      if (err) {
-        acLog(err);
-        return res.send({ errMsg: err });
-      }
+  try {
+    const { rows } = await db.query(
+      `SELECT * FROM ${USER_TABLE} WHERE ${ATTR_USERID} = $1`,
+      [userid]
+    );
 
-      return res.send(result);
-    }
-  )
+    return res.send(rows);
+  } catch (err) {
+    acLog(err);
+    return res.send({ errMsg: err });
+  }
 };
 
 //  @METHOD   GET
@@ -75,7 +71,7 @@ exports.getLogout = (req, res) => {
 //  @METHOD   POST
 //  @PATH     /user/signin      
 //  @DESC     Sign in user
-exports.postSignInUserWithEmailAndPassword = (req, res) => {
+exports.postSignInUserWithEmailAndPassword = async (req, res) => {
   const {
     email,
     password
@@ -87,42 +83,41 @@ exports.postSignInUserWithEmailAndPassword = (req, res) => {
     return res.send({ errMsg: "Missing information" });
   }
 
-  // Query existing user to return to client
-  db.query(
-    `SELECT * FROM ${USER_TABLE} WHERE ${ATTR_EMAIL} = $1`,
-    [email],
-    (err, result) => {
-      if (err) {
-        acLog(err);
-        return res.send({ errMsg: err });
-      } else if (result.rowCount === 0) {
-        return res.send({ errMsg: `User ${email} is not found` });
+  try {
+    const result = await db.query(
+      `SELECT * FROM ${USER_TABLE} WHERE ${ATTR_EMAIL} = $1`,
+      [email]
+    );
+
+    if (result.rowCount === 0) {
+      return res.send({ errMsg: `User ${email} is not found` });
+    }
+
+    const existingUser = result.rows[0];
+    bcrypt.compare(password, existingUser.password, (err, isMatch) => {
+      if (err) throw err;
+      if (!isMatch) {
+        acLog(`${existingUser.email} login with wrong password`);
+        return res.send({ errMsg: "Password is incorrect" })
       }
 
-      const existingUser = result.rows[0];
+      const userInfo = {
+        userid: existingUser[ATTR_USERID],
+        name: existingUser[ATTR_NAME],
+        email: existingUser[ATTR_EMAIL]
+      };
 
-      bcrypt.compare(password, existingUser.password, (err, isMatch) => {
-        if (err) throw err;
-        if (!isMatch) {
-          acLog(`${existingUser.email} login with wrong password`);
-          return res.send({ errMsg: "Password is incorrect" })
-        }
+      // Store the session
+      req.session.auth = userInfo;
 
-        const userInfo = {
-          userid: existingUser[ATTR_USERID],
-          name: existingUser[ATTR_NAME],
-          email: existingUser[ATTR_EMAIL]
-        };
-
-        // Store the session
-        req.session.auth = userInfo;
-
-        // Return the value
-        acLog(`${existingUser.email} login successfully`);
-        return res.send(userInfo);
-      })
-    }
-  );
+      // Return the value
+      acLog(`${existingUser.email} login successfully`);
+      return res.send(userInfo);
+    });
+  } catch (err) {
+    acLog(err);
+    return res.send({ errMsg: err });
+  }
 };
 
 //  @METHOD   POST
@@ -143,43 +138,32 @@ exports.postSignUpUserWithEmailAndPassword = (req, res) => {
 
   // Encrypt password
   bcrypt.genSalt(10, (err, salt) => {
-    bcrypt.hash(password, salt, (err, hashPwd) => {
-      // Create new user
-      db.query(
-        `INSERT INTO ${USER_TABLE} (${ATTR_NAME}, ${ATTR_EMAIL}, ${ATTR_PASSWORD}) VALUES ($1, $2, $3)`,
-        [name, email, hashPwd],
-        (err, result) => {
-          if (err) {
-            acLog(err);
-            return res.send({ errMsg: `${email} has already been existed` });
-          }
+    bcrypt.hash(password, salt, async (err, hashPwd) => {
+      if (err) throw err;
 
-          // Query new user to return to client
-          db.query(
-            `SELECT ${ALL_ATTR_EXCEPT_PWD} FROM ${USER_TABLE} WHERE ${ATTR_EMAIL} = $1`,
-            [email],
-            (err, result) => {
-              if (err) {
-                acLog(err);
-                return res.send({ errMsg: err });
-              }
-              // Store the session
-              req.session.auth = result.rows[0];
+      try {
+        const { rows } = await db.query(
+          `INSERT INTO ${USER_TABLE} (${ATTR_NAME}, ${ATTR_EMAIL}, ${ATTR_PASSWORD}) VALUES ($1, $2, $3) RETURNING ${ALL_ATTR_EXCEPT_PWD}`,
+          [name, email, hashPwd]
+        );
 
-              acLog(`Create successfully user ${result.rows[0].email}`);
-              return res.send(result.rows[0]);
-            }
-          )
-        }
-      );
-    })
+        // Store the session
+        req.session.auth = rows[0];
+
+        acLog(`Create successfully user ${rows[0].email}`);
+        return res.send(rows[0]);
+      } catch (err) {
+        acLog(err);
+        return res.send({ errMsg: `${email} has already been existed` });
+      }
+    });
   });
 };
 
 //  @METHOD   DELETE
 //  @PATH     /user/:userid      
 //  @DESC     Create new user 
-exports.deleteUserById = (req, res) => {
+exports.deleteUserById = async (req, res) => {
   const { userid } = req.params;
 
   // Check if missing any information
@@ -188,17 +172,15 @@ exports.deleteUserById = (req, res) => {
     return res.send({ errMsg: "Missing information" });
   }
 
-  // Create new user
-  db.query(
-    `DELETE FROM ${USER_TABLE} WHERE ${ATTR_USERID} = $1`,
-    [userid],
-    (err, result) => {
-      if (err) {
-        acLog(err);
-        return res.send({ errMsg: err });
-      }
+  try {
+    await db.query(
+      `DELETE FROM ${USER_TABLE} WHERE ${ATTR_USERID} = $1`,
+      [userid]
+    );
 
-      return res.send(result)
-    }
-  );
+    return res.send();
+  } catch (err) {
+    acLog(err);
+    return res.send({ errMsg: err });
+  }
 };

@@ -1,5 +1,5 @@
-const db = require('../models/postgres');
-const acLog = require('../utils/acLog');
+const db = require('../../models/postgres');
+const acLog = require('../../utils/acLog');
 const _ = require('lodash');
 
 const {
@@ -25,8 +25,8 @@ module.exports = async (redisClient) => {
     const { rows } = await db.query(`SELECT ${POLL_POLLID}, ${POLL_OPTIONS} FROM ${POLL_TABLE}`);
 
     const pollArr = rows;
-
-    // Check if with each poll existed in redis client
+    
+    // Create each poll in redis db if it not existed
     pollArr.forEach((poll, i) => {
       const redisPollSet = `poll-${poll[POLL_POLLID]}`;
 

@@ -89,12 +89,24 @@ exports.postCreatePoll = async (req, res) => {
 //  @PATH     /pollser/all      
 //  @DESC     Get all current poll
 exports.getAllPoll = async (req, res) => {
+  const {
+    user_id
+  } = req.query;
+
   try {
-    const { rows } = await db.query(`
+    let dbQueryStr = `
     SELECT ${POLL_ALL_RELATED_ATTR}
     FROM ${POLL_TABLE}
     INNER JOIN ${USER_TABLE}
-    ON ${POLL_TABLE}.${POLL_USERID} = ${USER_TABLE}.${USER_USERID};`);
+    ON ${POLL_TABLE}.${POLL_USERID} = ${USER_TABLE}.${USER_USERID}`;
+
+    if (user_id) {
+      dbQueryStr += ` WHERE ${USER_TABLE}.${USER_USERID} = '${user_id}';`;
+    } else {
+      dbQueryStr += ';';
+    }
+
+    const { rows } = await db.query(dbQueryStr);
 
     return res.send(rows);
   } catch (err) {
@@ -114,6 +126,8 @@ exports.getPollById = async (req, res) => {
     return res.json({ message: "Missing information" });
   }
 
+
+  //PENDING: Fetch all poll if vote publicly by anonymoust
   try {
     const { rows } = await db.query(`
     SELECT ${POLL_ALL_RELATED_ATTR}
@@ -128,4 +142,18 @@ exports.getPollById = async (req, res) => {
     acLog(err);
     return res.send({ errMsg: err });
   }
+}
+
+//  @METHOD   GET
+//  @PATH     /vote/:pollid
+//  @DESC     Vote for a poll
+//  @QUERY    user_id     Vote by a user identity
+//            ans_index   Index of choice(s)
+exports.getVotePoll = (req, res) => {
+  console.log(req.params);
+  console.log(req.query);
+
+  //PENDING: Check public poll and private poll here
+
+  //PENDING: Write to redis db
 }
