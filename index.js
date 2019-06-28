@@ -46,12 +46,13 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // Express init routes
-app.use('/pollser', (req, res, next) => {
+const redisAttach = (req, res, next) => {
   // Passing redis client through middlewares
   res.locals.redisClient = redisClient;
   next();
-}, pollRoutes);
-app.use('/user', userRoutes);
+}
+app.use('/pollser', redisAttach, pollRoutes);
+app.use('/user', redisAttach, userRoutes);
 
 // Redis initially synchronize with Postgres
 redisSync(redisClient);

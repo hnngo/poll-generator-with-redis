@@ -135,7 +135,7 @@ exports.getPollById = async (req, res) => {
     INNER JOIN ${USER_TABLE}
     ON ${POLL_TABLE}.${POLL_USERID} = ${USER_TABLE}.${USER_USERID}
     WHERE ${POLL_POLLID} = $1;`,
-    [pollid]);
+      [pollid]);
 
     return res.send(rows[0]);
   } catch (err) {
@@ -150,10 +150,47 @@ exports.getPollById = async (req, res) => {
 //  @QUERY    user_id     Vote by a user identity
 //            ans_index   Index of choice(s)
 exports.getVotePoll = (req, res) => {
-  console.log(req.params);
-  console.log(req.query);
+  const { pollid } = req.params;
+  const { user_id, ans_index } = req.query;
+  const { redisClient } = res.locals
+
+  if (!pollid || !user_id || !ans_index) {
+    acLog("Missing information");
+    return res.json({ message: "Missing information" });
+  }
 
   //PENDING: Check public poll and private poll here
 
-  //PENDING: Write to redis db
+  // Write to redis db
+  const redisPollName = 'poll-' + pollid;
+  const redisUpdateName = 'update-' + pollid;
+  const ans_arr = ans_index.split(',');
+
+  ans_arr.forEach((a) => {
+    const args = [redisPollName, "1", a];
+    redisClient.zincrby(args, (err) => {
+      if (err) throw err;
+    });
+  })
+
+  // Create the update key for poll
+  // update-[poll_id] '{ user_id1: [0], user_id2: [0, 1] }'
+  redisClient.get(redisUpdateName, (err, data) => {
+    if (err) throw err;
+
+    // If not exist, create and store in redis
+    if (!data) {
+      let updatedData = {};
+      updatedData[user_id] = ans_arr;
+      redisClient.set(redisUpdateName, JSON.stringify(updatedData));
+      return;
+    }
+
+    let updatedData = JSON.parse(data);
+    updatedData[user_id] = ans_arr;
+    redisClient.set(redisUpdateName, JSON.stringify(updatedData));
+    return;
+  })
+
+  //PENDING: Add to update trigger redis
 }

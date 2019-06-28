@@ -25,7 +25,7 @@ module.exports = async (redisClient) => {
     const { rows } = await db.query(`SELECT ${POLL_POLLID}, ${POLL_OPTIONS} FROM ${POLL_TABLE}`);
 
     const pollArr = rows;
-    
+
     // Create each poll in redis db if it not existed
     pollArr.forEach((poll, i) => {
       const redisPollSet = `poll-${poll[POLL_POLLID]}`;
@@ -41,18 +41,44 @@ module.exports = async (redisClient) => {
               [poll[POLL_POLLID], index]
             );
 
-            scores.push(res.rowCount);
+            scores.push(+res.rowCount);
           }
+          const opt_index = Array.apply(null, { length: poll[POLL_OPTIONS].length }).map(Number.call, Number);
 
-          const args = _.flatten(_.zip(scores, poll[POLL_OPTIONS]));
+          const args = _.flatten(_.zip(scores, opt_index));
           args.unshift(redisPollSet);
 
+          // Add to Redis DB
           redisClient.zadd(args, (err) => {
             if (err) throw err;
           });
         }
-      })
+      });
     });
+
+    // Set Interval update postgres for every 5 seconds
+    setInterval(async () => {
+      try {
+        // Check if key pattern update-
+        // update-[poll_id] '{ user_id1: [0], user_id2: [0, 1] }'
+        redisClient.keys('update-*', (err, data) => {
+          if (err) throw err;
+          else if (!data.length) {
+            return;
+          }
+
+          // Pending the update
+          data.forEach((d, i) => {
+            console.log(d)
+          });
+        });
+
+
+      } catch (err) {
+        acLog(err);
+        return res.send({ errMsg: err });
+      }
+    }, 5000);
   } catch (err) {
     acLog(err);
     throw err;
