@@ -53,7 +53,7 @@ exports.postCreatePoll = async (req, res) => {
     //PENDING: Check fields
     pollSettings.startingScores = optionalStartingScores;
   } else {
-    pollSettings.startingScores = new Array(question.length).fill(0);
+    pollSettings.startingScores = new Array(question.length - 1).fill(0);
   }
 
   // Store in postgres
@@ -64,11 +64,12 @@ exports.postCreatePoll = async (req, res) => {
     );
 
     // Store in redis server
-    const redisPollSet = 'poll-' + rows[0][POLL_POLLID];
-    const args = _.flatten(_.zip(pollSettings.startingScores, pollSettings.options));
-    args.unshift(redisPollSet);
+    const redisPollName = 'poll-' + rows[0][POLL_POLLID];
+    const opt_index = Array.apply(null, { length: rows[0][POLL_OPTIONS].length }).map(Number.call, Number);
+    const args = _.flatten(_.zip(pollSettings.startingScores, opt_index));
+    args.unshift(redisPollName);
 
-    redisClient.exists(redisPollSet, (isExisted) => {
+    redisClient.exists(redisPollName, (isExisted) => {
       if (!isExisted) {
         redisClient.zadd(args, (err) => {
           if (err) throw err;
@@ -76,9 +77,8 @@ exports.postCreatePoll = async (req, res) => {
       }
     });
 
-    acLog(rows[0]);
+    acLog(`User id ${rows[0][POLL_USERID]} created successfully poll id ${rows[0][POLL_POLLID]}`);
     return res.send(rows[0]);
-
   } catch (err) {
     acLog(err);
     return res.send({ errMsg: err });
@@ -107,7 +107,6 @@ exports.getAllPoll = async (req, res) => {
     }
 
     const { rows } = await db.query(dbQueryStr);
-
     return res.send(rows);
   } catch (err) {
     acLog(err);
@@ -126,8 +125,7 @@ exports.getPollById = async (req, res) => {
     return res.json({ message: "Missing information" });
   }
 
-
-  //PENDING: Fetch all poll if vote publicly by anonymoust
+  //PENDING: Fetch all poll if vote publicly by anonymous
   try {
     const { rows } = await db.query(`
     SELECT ${POLL_ALL_RELATED_ATTR}
@@ -190,7 +188,23 @@ exports.getVotePoll = (req, res) => {
     updatedData[user_id] = ans_arr;
     redisClient.set(redisUpdateName, JSON.stringify(updatedData));
     return;
-  })
+  });
+};
 
-  //PENDING: Add to update trigger redis
+//  @METHOD   DELETE
+//  @PATH     /pollser/:pollid      
+//  @DESC     Delete a poll
+exports.deletePollById = async (req, res) => {
+  const { pollid } = req.params;
+
+  try {
+    await db.query(
+      `DELETE FROM ${POLL_TABLE} WHERE ${POLL_POLLID} = $1`,
+      [pollid]
+    );
+    return res.send();
+  } catch (err) {
+    acLog(err);
+    return res.send({ errMsg: err });
+  }
 }

@@ -79,7 +79,8 @@ psql -U polladmin pollredis -h localhost -c "CREATE TABLE poll_answers (
   pollanswer_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   poll_id UUID NOT NULL,
   user_id UUID NOT NULL,
-  answer_index SMALLINT,
+  answer_index int[] NOT NULL,
+  UNIQUE(poll_id, user_id),
   FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
   FOREIGN KEY (poll_id) REFERENCES polls(poll_id) ON DELETE CASCADE
 );"

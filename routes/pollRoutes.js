@@ -18,12 +18,17 @@ router.get('/vote/:pollid', isLogin, pollController.getVotePoll);
 //  @METHOD   GET
 //  @PATH     /pollser/all      
 //  @DESC     Get all current poll
+//  @QUERY    user_id     Get all poll of a user
 router.get('/all', pollController.getAllPoll);
 
 //  @METHOD   GET
 //  @PATH     /pollser/:pollid      
 //  @DESC     Get poll by poll id
-//  @QUERY    user_id     Get all poll of a user
 router.get('/:pollid', pollController.getPollById);
+
+//  @METHOD   DELETE
+//  @PATH     /pollser/:pollid      
+//  @DESC     Delete a poll
+router.delete('/:pollid', pollController.deletePollById);
 
 module.exports = router;

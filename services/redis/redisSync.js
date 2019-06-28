@@ -37,12 +37,13 @@ module.exports = async (redisClient) => {
           for (let index = 0; index < poll[POLL_OPTIONS].length; index++) {
             const res = await db.query(
               `SELECT ${POLLANS_ID} FROM ${POLLANS_TABLE} 
-            WHERE ${POLLANS_POLLID} = $1 AND ${POLLANS_INDEX}= $2`,
+            WHERE ${POLLANS_POLLID} = $1 AND $2 = ANY(${POLLANS_INDEX})`,
               [poll[POLL_POLLID], index]
             );
 
             scores.push(+res.rowCount);
           }
+
           const opt_index = Array.apply(null, { length: poll[POLL_OPTIONS].length }).map(Number.call, Number);
 
           const args = _.flatten(_.zip(scores, opt_index));
@@ -67,9 +68,24 @@ module.exports = async (redisClient) => {
             return;
           }
 
-          // Pending the update
+          // Write update to postgres
           data.forEach((d, i) => {
-            console.log(d)
+            redisClient.get(d, async (err, data) => {
+              if (err) throw err;
+              const formattedData = JSON.parse(data);
+              const pollid = d.split('update-')[1];
+
+              const votees = Object.keys(formattedData);
+              votees.forEach(async (v) => {
+                await db.query(
+                  `INSERT INTO ${POLLANS_TABLE} (${POLLANS_POLLID}, ${POLLANS_USERID}, ${POLLANS_INDEX}) VALUES ($1, $2, $3)`,
+                  [pollid, v, formattedData[v]]
+                );
+                
+                // Delete from redis db
+                redisClient.del(d);
+              })
+            })
           });
         });
 
@@ -78,7 +94,7 @@ module.exports = async (redisClient) => {
         acLog(err);
         return res.send({ errMsg: err });
       }
-    }, 5000);
+    }, 7000);
   } catch (err) {
     acLog(err);
     throw err;
