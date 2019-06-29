@@ -55,7 +55,10 @@ const NewPollForm = (props) => {
   return (
     <div className="poll-setting-form">
       <form
-        onSubmit={props.handleSubmit((e) => props.actCreatePoll(e))}
+        onSubmit={props.handleSubmit((e) => {
+          props.actCreatePoll(e);
+          props.onClickCreate();
+        })}
       >
         <div className="poll-question">
           <p> Your Question</p>

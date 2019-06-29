@@ -72,6 +72,7 @@ psql -U polladmin pollredis -h localhost -c "CREATE TABLE polls (
   options text[] NOT NULL,
   date_created TIMESTAMP DEFAULT NOW(),
   last_updated TIMESTAMP DEFAULT NOW(),
+  scores int[] NOT NULL,
   FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );"
 

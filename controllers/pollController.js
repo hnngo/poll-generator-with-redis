@@ -27,7 +27,7 @@ const POLL_ALL_RELATED_ATTR = `${POLL_POLLID}, ${POLL_TABLE}.${POLL_USERID}, ${P
 //  @DESC     Start the polling with predefined setting
 exports.postCreatePoll = async (req, res) => {
   const { redisClient } = res.locals;
-  const { userid } = req.session.auth;
+  const { user_id } = req.session.auth;
   const {
     question,
     options,
@@ -53,14 +53,14 @@ exports.postCreatePoll = async (req, res) => {
     //PENDING: Check fields
     pollSettings.startingScores = optionalStartingScores;
   } else {
-    pollSettings.startingScores = new Array(question.length - 1).fill(0);
+    pollSettings.startingScores = new Array(options.length).fill(0);
   }
 
-  // Store in postgres
   try {
+    // Store in postgres
     const { rows } = await db.query(
       `INSERT INTO ${POLL_TABLE} (${POLL_USERID}, ${POLL_QUESTION}, ${POLL_OPTIONS}) VALUES ($1, $2, $3) RETURNING *`,
-      [userid, pollSettings.question, pollSettings.options]
+      [user_id, pollSettings.question, pollSettings.options]
     );
 
     // Store in redis server
@@ -88,6 +88,7 @@ exports.postCreatePoll = async (req, res) => {
 //  @METHOD   GET
 //  @PATH     /pollser/all      
 //  @DESC     Get all current poll
+//  @QUERY    user_id     Get all poll of a user
 exports.getAllPoll = async (req, res) => {
   const {
     user_id

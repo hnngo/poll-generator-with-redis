@@ -102,7 +102,7 @@ exports.postSignInUserWithEmailAndPassword = async (req, res) => {
       }
 
       const userInfo = {
-        userid: existingUser[ATTR_USERID],
+        user_id: existingUser[ATTR_USERID],
         name: existingUser[ATTR_NAME],
         email: existingUser[ATTR_EMAIL]
       };

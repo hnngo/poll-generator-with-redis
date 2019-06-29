@@ -11,10 +11,12 @@ import SignUpForm from './form/SignUpForm';
 import {
   TAB_CURRENT_POLL,
   TAB_NEW_POLL,
+  TAB_YOUR_POLLS,
   TAB_SIGN_IN,
   TAB_SIGN_UP
 } from '../constants';
 import HeaderLightBar from './HeaderLightBar';
+import YourPolls from './poll/YourPolls';
 
 const App = (props) => {
   const [viewTab, setViewTab] = useState(TAB_CURRENT_POLL);
@@ -31,7 +33,9 @@ const App = (props) => {
       case TAB_CURRENT_POLL:
         return <CurrentPolls />;
       case TAB_NEW_POLL:
-        return <NewPoll />;
+        return <NewPoll onSelectTab={(tab) => setViewTab(tab)}/>;
+      case TAB_YOUR_POLLS:
+        return <YourPolls />
       case TAB_SIGN_IN:
         return <SignInForm onSelectTab={(form) => setViewTab(form)} />;
       case TAB_SIGN_UP:

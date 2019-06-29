@@ -2,7 +2,8 @@ import axios from 'axios';
 import _ from 'lodash';
 import {
   ACT_POLL_CREATE,
-  ACT_FETCH_POLL_ALL
+  ACT_FETCH_POLL_ALL,
+  ACT_FETCH_YOUR_POLLS
 } from '../constants';
 
 export const actFetchAllPoll = () => {
@@ -11,6 +12,17 @@ export const actFetchAllPoll = () => {
 
     dispatch({
       type: ACT_FETCH_POLL_ALL,
+      payload: res.data
+    });
+  }
+};
+
+export const actFetchYourPoll = (user_id) => {
+  return async (dispatch) => {
+    const res = await axios.get(`/pollser/all?user_id=${user_id}`);
+
+    dispatch({
+      type: ACT_FETCH_YOUR_POLLS,
       payload: res.data
     });
   }
@@ -25,8 +37,6 @@ export const actCreatePoll = (pollsetting) => {
 
     const res = await axios.post('/pollser/create', formattedSetting);
 
-    console.log(res.data);
-    
     dispatch({
       type: ACT_POLL_CREATE,
       payload: res.data

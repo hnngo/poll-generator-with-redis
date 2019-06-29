@@ -1,24 +1,23 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import {
-  actFetchAllPoll
+  actFetchYourPoll
 } from '../../actions';
 import PollCard from './PollCard';
 
-const ExamplePolling = (props) => {
-  const { actFetchAllPoll, poll } = props;
+const YourPolls = (props) => {
+  const { actFetchYourPoll, user, poll } = props;
 
-  // Fetch all polls
   useEffect(() => {
-    actFetchAllPoll();
-  }, [actFetchAllPoll])
+    actFetchYourPoll(user.auth.user_id);
+  }, [actFetchYourPoll]);
 
   const renderPollCards = () => {
-    if (!poll.allPolls.length) {
+    if (!poll.userPolls.length) {
       return <div />;
     }
 
-    return poll.allPolls.map((poll, i) => {
+    return poll.userPolls.map((poll, i) => {
       return (
         <PollCard
           key={i}
@@ -37,10 +36,10 @@ const ExamplePolling = (props) => {
   );
 };
 
-const mapStateToProps = ({ poll }) => {
-  return { poll };
+const mapStateToProps = ({ poll, user }) => {
+  return { poll, user };
 }
 
 export default connect(mapStateToProps, {
-  actFetchAllPoll
-})(ExamplePolling);
+  actFetchYourPoll
+})(YourPolls);
