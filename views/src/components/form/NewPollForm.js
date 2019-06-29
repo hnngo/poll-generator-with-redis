@@ -8,8 +8,9 @@ import {
 } from '../../actions';
 
 const NewPollForm = (props) => {
-  const { formValues } = props;
+  const { formValues, poll } = props;
   const [numberOfOption, setNumberOfOption] = useState(2);
+  const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
     console.log(formValues);
@@ -21,6 +22,7 @@ const NewPollForm = (props) => {
         setNumberOfOption(numberOfOption + 1);
       }
     }
+
   }, [formValues]);
 
   const handleClickResetRow = () => {
@@ -52,12 +54,54 @@ const NewPollForm = (props) => {
     return content;
   }
 
+  const renderBtn = () => {
+    // Check if render loading button or normal button
+    if (!poll.isCreating) {
+      if (isCreating) {
+        setIsCreating(false);
+        props.onCreated();
+      }
+
+      return (
+        <div className="poll-btn">
+          <button className="btn-main-orange" type="submite">
+            Create Poll
+          </button>
+          <div
+            className="btn-main-danger"
+            onClick={() => props.dispatch(reset('newPoll'))}
+          >
+            Reset Form
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="poll-btn">
+        <button className="btn-main-orange" type="submite" disabled>
+          <span className="spinner-grow spinner-grow-sm px-1" />
+          <span className="spinner-grow spinner-grow-sm px-1" />
+          <span className="spinner-grow spinner-grow-sm px-1" />
+          <span>Creating...</span>
+        </button>
+        <div
+          className="btn-main-danger"
+          onClick={() => props.dispatch(reset('newPoll'))}
+          disabled
+        >
+          Reset Form
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="poll-setting-form">
       <form
         onSubmit={props.handleSubmit((e) => {
           props.actCreatePoll(e);
-          props.onClickCreate();
+          setIsCreating(true);
         })}
       >
         <div className="poll-question">
@@ -115,17 +159,7 @@ const NewPollForm = (props) => {
           {/* Poll Interval */}
           {/* Increment Range */}
         </div>
-        <div className="poll-btn">
-          <button className="btn-main-orange" type="submite">
-            Create Poll
-          </button>
-          <div
-            className="btn-main-danger"
-            onClick={() => props.dispatch(reset('newPoll'))}
-          >
-            Reset Form
-          </div>
-        </div>
+        {renderBtn()}
       </form>
     </div>
   );
@@ -143,19 +177,20 @@ const validate = values => {
       }
     }
   });
-  
+
   return errors
-} 
+}
 
 
-const mapStateToProps = ({ form }) => {
+const mapStateToProps = ({ form, poll }) => {
   if (form.newPoll) {
     return {
-      formValues: form.newPoll.values
+      formValues: form.newPoll.values,
+      poll
     };
   }
 
-  return {};
+  return { poll };
 }
 
 export default reduxForm({

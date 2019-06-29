@@ -8,6 +8,7 @@ const InputField = ({
   icon,
   meta: { touched, error },
   user,
+  poll,
   autocomplete
 }) => {
   const isErr = (touched && error);
@@ -16,7 +17,7 @@ const InputField = ({
     <div className="input-field">
       <i className={icon} />
       {
-        user.isProcessingAuth ?
+        (user.isProcessingAuth || poll.isCreating) ?
           <input
             {...input}
             placeholder={placeholder}
@@ -46,8 +47,8 @@ const InputField = ({
   );
 }
 
-const mapStateToProps = ({ user }) => {
-  return { user };
+const mapStateToProps = ({ user, poll }) => {
+  return { user, poll };
 }
 
 export default connect(mapStateToProps)(InputField);

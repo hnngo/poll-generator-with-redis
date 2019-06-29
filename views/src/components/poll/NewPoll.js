@@ -7,7 +7,7 @@ const NewPolling = (props) => {
     <div className="new-poll-container">
       <div className="container">
         <NewPollForm
-          onClickCreate={() => props.onSelectTab(TAB_YOUR_POLLS)}
+          onCreated={() => props.onSelectTab(TAB_YOUR_POLLS)}
         />
       </div>
     </div>
