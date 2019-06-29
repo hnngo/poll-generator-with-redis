@@ -1,5 +1,6 @@
 import axios from 'axios';
 import {
+  ACT_SAVE_SOCKET,
   ACT_FETCH_USER,
   ACT_SIGNING_UP,
   ACT_SIGN_UP_SUCCESSFULLY,
@@ -18,6 +19,13 @@ const isDataErr = (data) => {
   );
 }
 
+export const actSaveSocket = (socket) => {
+  return {
+    type: ACT_SAVE_SOCKET,
+    payload: socket
+  };
+};
+
 export const actFetchUser = () => {
   return async (dispatch) => {
     const res = await axios.get('/user/current');
@@ -27,13 +35,13 @@ export const actFetchUser = () => {
       payload: res.data
     });
   }
-}
+};
 
 export const actSignOut = () => {
   axios.get('/user/logout');
 
   return { type: ACT_SIGN_OUT_USER };
-}
+};
 
 export const actSignUpWithEmailAndPassword = (val) => {
   return async (dispatch) => {

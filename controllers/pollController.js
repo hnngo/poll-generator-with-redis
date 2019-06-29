@@ -1,6 +1,9 @@
 const _ = require('lodash');
 const acLog = require('../utils/acLog');
 const db = require('../models/postgres');
+const { redisClient } = require('../services/redis/redisClient');
+
+const LIMIT_PER_PAGE = 10;
 
 const {
   TBL_NAME: USER_TABLE,
@@ -26,7 +29,6 @@ const POLL_ALL_RELATED_ATTR = `${POLL_POLLID}, ${POLL_TABLE}.${POLL_USERID}, ${P
 //  @PATH     /pollser/create      
 //  @DESC     Start the polling with predefined setting
 exports.postCreatePoll = async (req, res) => {
-  const { redisClient } = res.locals;
   const { user_id } = req.session.auth;
   const {
     question,
@@ -57,10 +59,13 @@ exports.postCreatePoll = async (req, res) => {
   }
 
   try {
-    // Store in postgres
     const { rows } = await db.query(
       `INSERT INTO ${POLL_TABLE} (${POLL_USERID}, ${POLL_QUESTION}, ${POLL_OPTIONS}) VALUES ($1, $2, $3) RETURNING *`,
-      [user_id, pollSettings.question, pollSettings.options]
+      [
+        user_id,
+        pollSettings.question,
+        pollSettings.options
+      ]
     );
 
     // Store in redis server
@@ -95,6 +100,11 @@ exports.getAllPoll = async (req, res) => {
   } = req.query;
 
   try {
+
+
+
+
+    // POSTGRES/ query casual information
     let dbQueryStr = `
     SELECT ${POLL_ALL_RELATED_ATTR}
     FROM ${POLL_TABLE}
@@ -102,9 +112,12 @@ exports.getAllPoll = async (req, res) => {
     ON ${POLL_TABLE}.${POLL_USERID} = ${USER_TABLE}.${USER_USERID}`;
 
     if (user_id) {
-      dbQueryStr += ` WHERE ${USER_TABLE}.${USER_USERID} = '${user_id}';`;
+      dbQueryStr += ` WHERE ${USER_TABLE}.${USER_USERID} = '${user_id}'
+                      ORDER BY ${POLL_DATE_CREATED} DESC
+                      LIMIT ${LIMIT_PER_PAGE};`;
     } else {
-      dbQueryStr += ';';
+      dbQueryStr += ` ORDER BY ${POLL_DATE_CREATED} DESC
+                      LIMIT ${LIMIT_PER_PAGE};`;
     }
 
     const { rows } = await db.query(dbQueryStr);
@@ -151,7 +164,7 @@ exports.getPollById = async (req, res) => {
 exports.getVotePoll = (req, res) => {
   const { pollid } = req.params;
   const { user_id, ans_index } = req.query;
-  const { redisClient } = res.locals
+  // const { redisClient } = res.locals
 
   if (!pollid || !user_id || !ans_index) {
     acLog("Missing information");

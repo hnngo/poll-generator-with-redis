@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
 import socketIOClient from 'socket.io-client';
 import '../styles/style.css';
 import '../styles/bootstrap.min.css';
@@ -8,6 +9,9 @@ import CurrentPolls from './poll/CurrentPolls';
 import NewPoll from './poll/NewPoll';
 import SignInForm from './form/SignInForm';
 import SignUpForm from './form/SignUpForm';
+import HeaderLightBar from './HeaderLightBar';
+import YourPolls from './poll/YourPolls';
+import { actSaveSocket } from '../actions';
 import {
   TAB_CURRENT_POLL,
   TAB_NEW_POLL,
@@ -15,25 +19,33 @@ import {
   TAB_SIGN_IN,
   TAB_SIGN_UP
 } from '../constants';
-import HeaderLightBar from './HeaderLightBar';
-import YourPolls from './poll/YourPolls';
+
 
 const App = (props) => {
+  const { actSaveSocket } = props;
   const [viewTab, setViewTab] = useState(TAB_CURRENT_POLL);
 
   // Connect socketio
   useEffect(() => {
+    // Connect socket io
     const socket = socketIOClient('http://localhost:5000');
 
+    // Save the connection info
+    actSaveSocket(socket);
+
     return () => socket.close();
-  }, []);
+  }, [actSaveSocket]);
 
   const renderContent = () => {
+    if (!props.socket) {
+      return <div />;
+    }
+
     switch (viewTab) {
       case TAB_CURRENT_POLL:
         return <CurrentPolls />;
       case TAB_NEW_POLL:
-        return <NewPoll onSelectTab={(tab) => setViewTab(tab)}/>;
+        return <NewPoll onSelectTab={(tab) => setViewTab(tab)} />;
       case TAB_YOUR_POLLS:
         return <YourPolls />
       case TAB_SIGN_IN:
@@ -66,4 +78,9 @@ const App = (props) => {
   );
 }
 
-export default App;
+const mapStateToProps = ({ user }) => {
+  const socket = user.socket;
+  return { socket };
+}
+
+export default connect(mapStateToProps, { actSaveSocket })(App);

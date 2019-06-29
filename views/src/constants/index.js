@@ -8,6 +8,9 @@ export const TAB_SIGN_UP = "TAB_SIGN_UP";
 // SETTING TYPE
 export const TYPE_INPUT_NUMBER = "TYPE_INPUT_NUMBER";
 
+// ACTIONS - SOCKET
+export const ACT_SAVE_SOCKET = "ACT_SAVE_SOCKET";
+
 // ACTIONS - USER
 export const ACT_FETCH_USER = "ACT_FETCH_USER";
 export const ACT_SIGNING_UP = "ACT_SIGNING_UP";

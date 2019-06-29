@@ -72,14 +72,14 @@ psql -U polladmin pollredis -h localhost -c "CREATE TABLE polls (
   options text[] NOT NULL,
   date_created TIMESTAMP DEFAULT NOW(),
   last_updated TIMESTAMP DEFAULT NOW(),
-  scores int[] NOT NULL,
   FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );"
 
 psql -U polladmin pollredis -h localhost -c "CREATE TABLE poll_answers (
   pollanswer_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   poll_id UUID NOT NULL,
-  user_id UUID NOT NULL,
+  user_id UUID,
+  anonymous BOOL NOT NULL DEFAULT false,
   answer_index int[] NOT NULL,
   UNIQUE(poll_id, user_id),
   FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,

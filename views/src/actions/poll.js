@@ -7,30 +7,29 @@ import {
   ACT_FETCH_YOUR_POLLS
 } from '../constants';
 
-export const actFetchAllPoll = () => {
-  return async (dispatch) => {
+export const actFetchAllPoll = (user_id = null) => {
+  return async (dispatch, getState) => {
     try {
-      const res = await axios.get('/pollser/all');
+      const { user } = getState();
+
+      // Setup query string
+      let queryString = '/pollser/all?';
+      let type = ACT_FETCH_POLL_ALL;
+      if (user_id) {
+        queryString += `user_id=${user_id}`;
+        type = ACT_FETCH_YOUR_POLLS;
+      }
+      
+      const res = await axios.get(queryString);
 
       dispatch({
-        type: ACT_FETCH_POLL_ALL,
+        type,
         payload: res.data
       });
-    } catch (err) {
-      console.log(err);
-    }
-  }
-};
 
-export const actFetchYourPoll = (user_id) => {
-  return async (dispatch) => {
-    try {
-      const res = await axios.get(`/pollser/all?user_id=${user_id}`);
-
-      dispatch({
-        type: ACT_FETCH_YOUR_POLLS,
-        payload: res.data
-      });
+      // Trigger socket io the subscribed poll set
+      const subscribedPolls = _.map(res.data, (p) => p.poll_id)
+      user.socket.emit('subscribe poll', subscribedPolls);
     } catch (err) {
       console.log(err);
     }

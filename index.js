@@ -1,8 +1,5 @@
 const express = require("express");
 const session = require("express-session");
-const redis = require('redis');
-const redisClient = redis.createClient();
-const redisSync = require('./services/redis/redisSync');
 const pollRoutes = require('./routes/pollRoutes');
 const userRoutes = require('./routes/userRoutes');
 const keys = require('./config/keys');
@@ -14,18 +11,10 @@ require('./models/postgres');
 const app = express();
 const server = require('http').createServer(app);
 
-// Redis setup
-redisClient.on('connect', () => {
-  // Clear old memories
-  redisClient.flushall();
-  acLog('Redis client connected');
-});
+// Redis connection init
+const { redisClient } = require('./services/redis/redisClient');
 
-redisClient.on('error', (err) => {
-  acLog('Redis client cannot connect ' + err);
-});
-
-// Socketio setuo
+// Socketio connection init
 require('./services/socketio')(server);
 
 // Express middlewares
@@ -51,11 +40,8 @@ const redisAttach = (req, res, next) => {
   res.locals.redisClient = redisClient;
   next();
 }
-app.use('/pollser', redisAttach, pollRoutes);
+app.use('/pollser', pollRoutes);
 app.use('/user', redisAttach, userRoutes);
-
-// Redis initially synchronize with Postgres
-redisSync(redisClient);
 
 // App listen to a port
 const port = process.env.PORT || 5000;

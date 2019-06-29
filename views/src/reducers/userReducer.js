@@ -1,4 +1,5 @@
 import {
+  ACT_SAVE_SOCKET,
   ACT_FETCH_USER,
   ACT_SIGN_IN_SUCCESSFULLY,
   ACT_SIGN_IN_UNSUCCESSFULLY,
@@ -14,11 +15,14 @@ const INITIAL_STATE = {
   auth: undefined,
   isProcessingAuth: false,
   errMsg: "",
-  votedPoll: {}
+  votedPoll: {},
+  socket: null
 };
 
 export default (state = INITIAL_STATE, action) => {
   switch (action.type) {
+    case ACT_SAVE_SOCKET:
+      return { ...state, socket: action.payload };
     case "@@redux-form/CHANGE":
       return { ...state, errMsg: "" };
     case ACT_SIGNING_IN:

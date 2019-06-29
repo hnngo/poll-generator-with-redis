@@ -22,7 +22,11 @@ const {
 
 module.exports = async (redisClient) => {
   try {
-    const { rows } = await db.query(`SELECT ${POLL_POLLID}, ${POLL_OPTIONS} FROM ${POLL_TABLE}`);
+    const { rows } = await db.query(
+      `SELECT ${POLL_POLLID}, ${POLL_OPTIONS} FROM ${POLL_TABLE}
+       ORDER BY ${POLL_DATE_CREATED} DESC
+       LIMIT 1000`
+    );
 
     const pollArr = rows;
 
@@ -37,7 +41,7 @@ module.exports = async (redisClient) => {
           for (let index = 0; index < poll[POLL_OPTIONS].length; index++) {
             const res = await db.query(
               `SELECT ${POLLANS_ID} FROM ${POLLANS_TABLE} 
-            WHERE ${POLLANS_POLLID} = $1 AND $2 = ANY(${POLLANS_INDEX})`,
+               WHERE ${POLLANS_POLLID} = $1 AND $2 = ANY(${POLLANS_INDEX})`,
               [poll[POLL_POLLID], index]
             );
 
@@ -81,15 +85,13 @@ module.exports = async (redisClient) => {
                   `INSERT INTO ${POLLANS_TABLE} (${POLLANS_POLLID}, ${POLLANS_USERID}, ${POLLANS_INDEX}) VALUES ($1, $2, $3)`,
                   [pollid, v, formattedData[v]]
                 );
-                
+
                 // Delete from redis db
                 redisClient.del(d);
               })
             })
           });
         });
-
-
       } catch (err) {
         acLog(err);
         return res.send({ errMsg: err });
