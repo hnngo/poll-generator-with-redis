@@ -14,19 +14,15 @@ module.exports = (server) => {
 
     // Save the socket info
     connections.push(conObj);
+    const socketIndex = _.findIndex(connections, (c) => c.socketInfo === socket);
     acLog(`Total Connections: ${connections.length}`);
 
     // Listen to client activities
     socket.on('subscribe poll', (listOfPolls) => {
-      console.log(listOfPolls)
-      const socketIndex = _.findIndex(connections, (c) => c.socketInfo === socket);
-
       connections[socketIndex].subscribedPolls = [...listOfPolls];
     });
 
     socket.on('disconnect', () => {
-      const socketIndex = _.findIndex(connections, (c) => c.socketInfo === socket);
-
       connections.splice(socketIndex, 1);
       acLog(`Total Connections: ${connections.length}`);
     })

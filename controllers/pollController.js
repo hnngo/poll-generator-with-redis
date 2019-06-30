@@ -23,6 +23,14 @@ const {
   ATTR_LAST_UPDATED: POLL_LAST_UPDATED
 } = db.pollTable;
 
+const {
+  TBL_NAME: POLLANS_TABLE,
+  ATTR_POLLANS_ID: POLLANS_ID,
+  ATTR_POLLID: POLLANS_POLLID,
+  ATTR_USERID: POLLANS_USERID,
+  ATTR_ANSWER_INDEX: POLLANS_INDEX
+} = db.pollAnswerTable;
+
 const POLL_ALL_RELATED_ATTR = `${POLL_POLLID}, ${POLL_TABLE}.${POLL_USERID}, ${POLL_QUESTION}, ${POLL_OPTIONS}, ${POLL_DATE_CREATED}, ${POLL_LAST_UPDATED}, ${USER_NAME}, ${USER_EMAIL}`;
 
 //  @METHOD   POST
@@ -100,10 +108,6 @@ exports.getAllPoll = async (req, res) => {
   } = req.query;
 
   try {
-
-
-
-
     // POSTGRES/ query casual information
     let dbQueryStr = `
     SELECT ${POLL_ALL_RELATED_ATTR}
@@ -121,7 +125,42 @@ exports.getAllPoll = async (req, res) => {
     }
 
     const { rows } = await db.query(dbQueryStr);
-    return res.send(rows);
+
+    // Get the scores each poll
+    rows.forEach(async (poll, i) => {
+      let currentScores = [];
+      const args = [
+        `poll-${poll[POLL_POLLID]}`,
+        0,
+        -1,
+        "WITHSCORES"
+      ]
+
+      // REDIS/ Check if redis keep the most updated scores
+      const data = await redisClient.zrangeAsync(args);
+      if (data) {
+        console.log(data);
+      } else {
+        // If not then get score from Postgres
+        // POSTGRES/ Get score of each answer
+        for (let index = 0; index < poll[POLL_OPTIONS].length; index++) {
+          const res = await db.query(
+            `SELECT ${POLLANS_ID} FROM ${POLLANS_TABLE} 
+              WHERE ${POLLANS_POLLID} = $1 AND $2 = ANY(${POLLANS_INDEX})`,
+            [poll[POLL_POLLID], index]
+          );
+
+          currentScores.push(+res.rowCount);
+        }
+      };
+
+      poll.scores = currentScores;
+
+      // Check if get enough scores for all polls then send back client
+      if (i === (rows.length - 1)) {
+        return res.send(rows);
+      }
+    });
   } catch (err) {
     acLog(err);
     return res.send({ errMsg: err });
