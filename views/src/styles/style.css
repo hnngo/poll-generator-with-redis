@@ -462,8 +462,6 @@ body {
   max-width: 800px;
   margin: 20px;
   border-radius: 20px;
-  -webkit-box-shadow: 1px 1px 3px 0px #dfdfdf;
-          box-shadow: 1px 1px 3px 0px #dfdfdf;
 }
 
 .poll-card-container .poll-question {
@@ -542,5 +540,17 @@ body {
   font-weight: 400;
   font-style: normal;
   letter-spacing: unset;
+}
+
+.voted-bound {
+  border: 5px solid #517cda;
+  -webkit-box-shadow: 0px 0px 4px 1px #517cda;
+          box-shadow: 0px 0px 4px 1px #517cda;
+}
+
+.unvoted-bound {
+  border: 5px solid #81f072;
+  -webkit-box-shadow: 0px 0px 4px 1px #81f072;
+          box-shadow: 0px 0px 4px 1px #81f072;
 }
 /*# sourceMappingURL=style.css.map */

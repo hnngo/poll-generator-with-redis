@@ -65,7 +65,7 @@ module.exports = async (redisClient) => {
     setInterval(async () => {
       acLog("Redis Interval checking");
       try {
-        // Check if key pattern update-
+        // REDIS/ Check if key pattern update-
         // update-[poll_id] '{ user_id1: [0], user_id2: [0, 1] }'
         redisClient.keys('update-*', (err, data) => {
           if (err) throw err;
@@ -77,9 +77,10 @@ module.exports = async (redisClient) => {
           data.forEach((d, i) => {
             redisClient.get(d, async (err, data) => {
               if (err) throw err;
+
+              // POSTGRES/
               const formattedData = JSON.parse(data);
               const pollid = d.split('update-')[1];
-
               const votees = Object.keys(formattedData);
               votees.forEach(async (v) => {
                 await db.query(
@@ -89,8 +90,15 @@ module.exports = async (redisClient) => {
 
                 // Delete from redis db
                 redisClient.del(d);
-              })
-            })
+              });
+
+              await db.query(
+                `UPDATE ${POLL_TABLE}
+                 SET ${POLL_LAST_UPDATED} = DEFAULT
+                 WHERE ${POLL_POLLID} = $1`,
+                [pollid]
+              );
+            });
           });
         });
       } catch (err) {

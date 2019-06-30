@@ -1,7 +1,14 @@
 import React from 'react';
+import { connect } from 'react-redux';
+import { formatTime } from '../utils';
 
 const PollCard = (props) => {
-  const { poll } = props;
+  const { poll, user } = props;
+
+  let isVotedByUser = false;
+  if (user.auth && Object.keys(user.auth.votedPolls).includes(poll.poll_id)) {
+    isVotedByUser = true;
+  }
 
   const renderOptions = () => {
     return poll.options.map((option, i) => {
@@ -16,7 +23,7 @@ const PollCard = (props) => {
   };
 
   return (
-    <div className="poll-card-container">
+    <div className={"poll-card-container " + (isVotedByUser ? "voted-bound" : "unvoted-bound")}>
       <div className="poll-question">
         {/* {poll.poll_id} */}
         {poll.question}
@@ -29,18 +36,22 @@ const PollCard = (props) => {
       <div className="poll-info">
         <div className="poll-user-created">
           <div className="user-name">
-            Created by {poll.name} - 
+            Created by {poll.name} -&nbsp;
           </div>
           <div className="created-time">
-            Created 3 days ago
+            {formatTime(new Date() - new Date(poll.date_created))}
           </div>
         </div>
         <div className="poll-updated-time">
-          Last updated 10 minutes ago
+          Last updated {formatTime(new Date() - new Date(poll.last_updated))}
         </div>
       </div>
     </div>
   );
 }
 
-export default PollCard;
+const mapStateToProps = ({ user }) => {
+  return { user };
+}
+
+export default connect(mapStateToProps)(PollCard);
