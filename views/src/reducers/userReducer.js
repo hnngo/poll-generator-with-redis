@@ -15,7 +15,6 @@ const INITIAL_STATE = {
   auth: undefined,
   isProcessingAuth: false,
   errMsg: "",
-  votedPoll: {},
   socket: null
 };
 

@@ -139,9 +139,14 @@ exports.getAllPoll = async (req, res) => {
       // REDIS/ Check if redis keep the most updated scores
       const data = await redisClient.zrangeAsync(args);
       if (data) {
-        console.log(data);
+        data.forEach((s, i) => {
+          // Assign to the current score
+          if (!(i % 2)) {
+            currentScores[+s] = data[i + 1];
+          }
+        });
       } else {
-        // If not then get score from Postgres
+        // If not existed then get score from Postgres
         // POSTGRES/ Get score of each answer
         for (let index = 0; index < poll[POLL_OPTIONS].length; index++) {
           const res = await db.query(
@@ -203,7 +208,6 @@ exports.getPollById = async (req, res) => {
 exports.getVotePoll = (req, res) => {
   const { pollid } = req.params;
   const { user_id, ans_index } = req.query;
-  // const { redisClient } = res.locals
 
   if (!pollid || !user_id || !ans_index) {
     acLog("Missing information");

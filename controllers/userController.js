@@ -5,12 +5,37 @@ const bcrypt = require('bcrypt');
 // Prepare Attributes Constant
 const {
   TBL_NAME: USER_TABLE,
-  ATTR_EMAIL,
-  ATTR_NAME,
-  ATTR_PASSWORD,
-  ATTR_USERID
+  ATTR_EMAIL: USER_EMAIL,
+  ATTR_NAME: USER_NAME,
+  ATTR_PASSWORD: USER_PASSWORD,
+  ATTR_USERID: USER_USERID
 } = db.userTable;
-const ALL_ATTR_EXCEPT_PWD = `${ATTR_USERID}, ${ATTR_EMAIL}, ${ATTR_NAME}`;
+
+const {
+  TBL_NAME: POLLANS_TABLE,
+  ATTR_POLLANS_ID: POLLANS_ID,
+  ATTR_POLLID: POLLANS_POLLID,
+  ATTR_USERID: POLLANS_USERID,
+  ATTR_ANSWER_INDEX: POLLANS_INDEX
+} = db.pollAnswerTable;
+
+const ALL_ATTR_EXCEPT_PWD = `${USER_USERID}, ${USER_EMAIL}, ${USER_NAME}`;
+
+const getALlVotedPolls = async (userId) => {
+  const { rows } = await db.query(
+    `SELECT ${POLLANS_POLLID}, ${POLLANS_INDEX} FROM ${POLLANS_TABLE}
+     WHERE ${POLLANS_USERID} = $1`,
+    [userId]
+  );
+
+  // Prepare the voted polls object
+  const res = {};
+  rows.map((p) => {
+    res[p[POLLANS_POLLID]] = p[POLLANS_INDEX];
+  })
+
+  return res;
+}
 
 //  @METHOD   GET
 //  @PATH     /user/get-all-users      
@@ -29,8 +54,15 @@ exports.getAllUsers = async (req, res) => {
 //  @METHOD   GET
 //  @PATH     /user/current
 //  @DESC     Get current users
-exports.getCurrentUser = (req, res) => {
-  return res.send(req.session.auth);
+exports.getCurrentUser = async (req, res) => {
+  const userInfo = req.session.auth;
+
+  // Get voted polls if existed
+  if (userInfo) {
+    userInfo.votedPolls = await getALlVotedPolls(userInfo[USER_USERID]);
+  }
+
+  return res.send(userInfo);
 };
 
 //  @METHOD   GET
@@ -47,7 +79,7 @@ exports.getUserById = async (req, res) => {
 
   try {
     const { rows } = await db.query(
-      `SELECT * FROM ${USER_TABLE} WHERE ${ATTR_USERID} = $1`,
+      `SELECT * FROM ${USER_TABLE} WHERE ${USER_USERID} = $1`,
       [userid]
     );
 
@@ -85,7 +117,7 @@ exports.postSignInUserWithEmailAndPassword = async (req, res) => {
 
   try {
     const result = await db.query(
-      `SELECT * FROM ${USER_TABLE} WHERE ${ATTR_EMAIL} = $1`,
+      `SELECT * FROM ${USER_TABLE} WHERE ${USER_EMAIL} = $1`,
       [email]
     );
 
@@ -94,7 +126,7 @@ exports.postSignInUserWithEmailAndPassword = async (req, res) => {
     }
 
     const existingUser = result.rows[0];
-    bcrypt.compare(password, existingUser.password, (err, isMatch) => {
+    bcrypt.compare(password, existingUser.password, async (err, isMatch) => {
       if (err) throw err;
       if (!isMatch) {
         acLog(`${existingUser.email} login with wrong password`);
@@ -102,13 +134,16 @@ exports.postSignInUserWithEmailAndPassword = async (req, res) => {
       }
 
       const userInfo = {
-        user_id: existingUser[ATTR_USERID],
-        name: existingUser[ATTR_NAME],
-        email: existingUser[ATTR_EMAIL]
+        user_id: existingUser[USER_USERID],
+        name: existingUser[USER_NAME],
+        email: existingUser[USER_EMAIL]
       };
 
       // Store the session
       req.session.auth = userInfo;
+
+      // Get all the voted polls and choices
+      userInfo.votedPolls = await getALlVotedPolls(userInfo[USER_USERID]);
 
       // Return the value
       acLog(`${existingUser.email} login successfully`);
@@ -143,7 +178,7 @@ exports.postSignUpUserWithEmailAndPassword = (req, res) => {
 
       try {
         const { rows } = await db.query(
-          `INSERT INTO ${USER_TABLE} (${ATTR_NAME}, ${ATTR_EMAIL}, ${ATTR_PASSWORD}) VALUES ($1, $2, $3) RETURNING ${ALL_ATTR_EXCEPT_PWD}`,
+          `INSERT INTO ${USER_TABLE} (${USER_NAME}, ${USER_EMAIL}, ${USER_PASSWORD}) VALUES ($1, $2, $3) RETURNING ${ALL_ATTR_EXCEPT_PWD}`,
           [name, email, hashPwd]
         );
 
@@ -174,7 +209,7 @@ exports.deleteUserById = async (req, res) => {
 
   try {
     await db.query(
-      `DELETE FROM ${USER_TABLE} WHERE ${ATTR_USERID} = $1`,
+      `DELETE FROM ${USER_TABLE} WHERE ${USER_USERID} = $1`,
       [userid]
     );
 

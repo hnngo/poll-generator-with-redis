@@ -15,7 +15,7 @@ const SignInForm = (props) => {
 
   useEffect(() => {
     //DEBUG
-    props.actSignInpWithEmailAndPassword({ email: 'nick@test.com', password: 'test123'});
+    props.actSignInpWithEmailAndPassword({ email: 'emily@test.com', password: 'test123'});
     //DEBUG
 
     // Clear err msg if exist
