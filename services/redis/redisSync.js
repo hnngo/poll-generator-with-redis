@@ -21,6 +21,10 @@ const {
   ATTR_ANONYMOUS: POLLANS_ANONYMOUS
 } = db.pollAnswerTable;
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 module.exports = async (redisClient) => {
   try {
     const { rows } = await db.query(
@@ -32,88 +36,105 @@ module.exports = async (redisClient) => {
     const pollArr = rows;
 
     // Create each poll in redis db if it not existed
-    pollArr.forEach((poll, i) => {
+    pollArr.forEach(async (poll, i) => {
       const redisPollSet = `poll-${poll[POLL_POLLID]}`;
 
-      redisClient.exists(redisPollSet, async (isExist) => {
-        if (!isExist) {
-          // Get the current score
-          const scores = [];
-          for (let index = 0; index < poll[POLL_OPTIONS].length; index++) {
-            const res = await db.query(
-              `SELECT ${POLLANS_ID} FROM ${POLLANS_TABLE} 
+      await sleep(10);
+      const isExist = await redisClient.existsAsync(redisPollSet);
+      if (!isExist) {
+        // Get the current score
+        const scores = [];
+        for (let index = 0; index < poll[POLL_OPTIONS].length; index++) {
+          const res = await db.query(
+            `SELECT ${POLLANS_ID} FROM ${POLLANS_TABLE} 
                WHERE ${POLLANS_POLLID} = $1 AND $2 = ANY(${POLLANS_INDEX})`,
-              [poll[POLL_POLLID], index]
-            );
+            [poll[POLL_POLLID], index]
+          );
 
-            scores.push(+res.rowCount);
-          }
-
-          const opt_index = Array.apply(null, { length: poll[POLL_OPTIONS].length }).map(Number.call, Number);
-
-          const args = _.flatten(_.zip(scores, opt_index));
-          args.unshift(redisPollSet);
-
-          // Add to Redis DB
-          redisClient.zadd(args, (err) => {
-            if (err) throw err;
-          });
+          scores.push(+res.rowCount);
         }
-      });
+
+        const opt_index = Array.apply(null, { length: poll[POLL_OPTIONS].length }).map(Number.call, Number);
+
+        const args = _.flatten(_.zip(scores, opt_index));
+        args.unshift(redisPollSet);
+
+        // Add to Redis DB
+        await sleep(10);
+        await redisClient.zadd(args);
+      }
     });
 
-    // Set Interval update postgres for every 5 seconds
+    // Set interval updating postgres
     setInterval(async () => {
       acLog("Redis Interval checking");
       try {
         // REDIS/ Check if key pattern update-
         // update-[poll_id] '{ user_id1: [0], user_id2: [0, 1] }'
-        redisClient.keys('update-*', (err, data) => {
-          if (err) throw err;
-          else if (!data.length) {
-            return;
+        await sleep(10);
+        const result = await redisClient.scanAsync([0, "MATCH", "update-*"]);
+        if (!result[1].length) {
+          return;
+        }
+
+        // Write update to postgres
+        result[1].forEach(async (d, i) => {
+          await sleep(10);
+          const data = await redisClient.getAsync(d);
+          let cursor = +(await redisClient.getAsync("cursor-" + d));
+          if (!cursor) {
+            cursor = -1;
           }
 
-          // Write update to postgres
-          data.forEach((d, i) => {
-            redisClient.get(d, async (err, data) => {
-              if (err) throw err;
+          console.log(cursor)
+          
+          // POSTGRES/
+          const formattedData = JSON.parse(data);
+          const pollid = d.split('update-')[1];
+          const votees = Object.keys(formattedData);
+          console.log("In sync: ", Object.keys(formattedData).length);
 
-              // POSTGRES/
-              const formattedData = JSON.parse(data);
-              const pollid = d.split('update-')[1];
-              const votees = Object.keys(formattedData);
-              votees.forEach(async (v) => {
-                if (v.includes('anonymous')) {
-                  await db.query(
-                    `INSERT INTO ${POLLANS_TABLE} (${POLLANS_POLLID}, ${POLLANS_ANONYMOUS}, ${POLLANS_INDEX}) VALUES ($1, $2, $3)`,
-                    [pollid, true, formattedData[v]]
-                  );
-                } else {
-                  await db.query(
-                    `INSERT INTO ${POLLANS_TABLE} (${POLLANS_POLLID}, ${POLLANS_USERID}, ${POLLANS_INDEX}) VALUES ($1, $2, $3)`,
-                    [pollid, v, formattedData[v]]
-                  );
-                }
+          votees.forEach(async (v, i) => {
+            if (i <= cursor) {
+              return;
+            }
 
-                // Delete from redis db
-                redisClient.del(d);
-              });
-
+            if (v.includes('anonymous')) {
+              // await db.query('BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE')
               await db.query(
-                `UPDATE ${POLL_TABLE}
+                `INSERT INTO ${POLLANS_TABLE} (${POLLANS_POLLID}, ${POLLANS_ANONYMOUS}, ${POLLANS_INDEX}) VALUES ($1, $2, $3)`,
+                [pollid, true, formattedData[v]]
+              );
+              // await db.query('COMMIT');
+            } else {
+
+              // await db.query('BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE');
+              await db.query(
+                `INSERT INTO ${POLLANS_TABLE} (${POLLANS_POLLID}, ${POLLANS_USERID}, ${POLLANS_INDEX}) VALUES ($1, $2, $3)`,
+                [pollid, v, formattedData[v]]
+              );
+              // await db.query('COMMIT');
+            }
+
+            if (i === votees.length - 1) {
+              cursor = i;
+              await redisClient.setAsync("cursor-" + d, cursor);
+            }
+          });
+
+          // await sleep(10);
+          // await redisClient.delAsync(d);
+          await db.query(
+            `UPDATE ${POLL_TABLE}
                  SET ${POLL_LAST_UPDATED} = DEFAULT
                  WHERE ${POLL_POLLID} = $1`,
-                [pollid]
-              );
-            });
-          });
+            [pollid]
+          );
         });
       } catch (err) {
         acLog(err);
-        return res.send({ errMsg: err });
       }
-    }, 7000);
+    }, 10000);
   } catch (err) {
     acLog(err);
     throw err;

@@ -12,7 +12,7 @@ const PollCard = (props) => {
   const isPrivate = poll.private;
   const isAuth = user.auth;
   const isVoted = isAuth && Object.keys(user.auth.votedPolls).includes(poll.poll_id);
-
+  console.log(poll)
   let isAbleToVote = true;
   let boundOption = "unvoted-bound";
   if (isPrivate && !isAuth) {
@@ -31,14 +31,19 @@ const PollCard = (props) => {
             {
               poll.options.map((option, i) => {
                 return (
-                  <div key={i}>
-                    <input
-                      type="radio"
-                      value={i}
-                      name={poll.poll_id}
-                      onChange={(e) => setChoices(+e.target.value)}
-                    />
-                    {option}
+                  <div key={i} className="row">
+                    <div className="col-1">
+                      {poll.scores[i]}
+                    </div>
+                    <div className="col-11">
+                      <input
+                        type="radio"
+                        value={i}
+                        name={poll.poll_id}
+                        onChange={(e) => setChoices(+e.target.value)}
+                      />
+                      {option}
+                    </div>
                   </div>
                 );
               })
@@ -62,7 +67,14 @@ const PollCard = (props) => {
               <li
                 key={i}
               >
-                {option}
+                <div className="row">
+                  <div className="col-1">
+                    {poll.scores[i]}
+                  </div>
+                  <div className="col-11">
+                    {option}
+                  </div>
+                </div>
               </li>
             );
           })
