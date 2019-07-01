@@ -25,7 +25,7 @@ $theme-colors: (
   "placeholder-text": rgba(185, 184, 184, 0.568),
   "danger-text":      rgb(236, 60, 60),
   "shadow-danger":    rgb(121, 46, 46),
-  "close-poll":       #b3b3b3,
+  "close-poll":       #a0a0a0,
   "voted-poll":       #517cda,
   "unvoted-poll":     #81f072
 );
@@ -438,4 +438,9 @@ $breakpoints: (
 .unvoted-bound {
   border: 5px solid map-get($map: $theme-colors, $key: unvoted-poll);
   box-shadow: 0px 0px 4px 1px map-get($map: $theme-colors, $key: unvoted-poll);
+}
+
+.close-bound {
+  border: 5px solid map-get($map: $theme-colors, $key: close-poll);
+  box-shadow: 0px 0px 4px 1px map-get($map: $theme-colors, $key: close-poll);
 }

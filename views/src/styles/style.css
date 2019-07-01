@@ -553,4 +553,10 @@ body {
   -webkit-box-shadow: 0px 0px 4px 1px #81f072;
           box-shadow: 0px 0px 4px 1px #81f072;
 }
+
+.close-bound {
+  border: 5px solid #a0a0a0;
+  -webkit-box-shadow: 0px 0px 4px 1px #a0a0a0;
+          box-shadow: 0px 0px 4px 1px #a0a0a0;
+}
 /*# sourceMappingURL=style.css.map */

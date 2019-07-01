@@ -133,7 +133,7 @@ const NewPollForm = (props) => {
           <div className="set-public">
             <p>Set as Private poll (require voter to sign in)</p>
             <Field
-              name="privatePoll"
+              name="isPrivate"
               type="checkbox"
               component={SwitchField}
             />
@@ -199,7 +199,7 @@ export default reduxForm({
     question: "",
     option0: "",
     option1: "",
-    privatePoll: false,
+    isPrivate: false,
     multipleChoice: false
   },
   validate

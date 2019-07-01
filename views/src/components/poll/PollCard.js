@@ -5,9 +5,16 @@ import { formatTime } from '../utils';
 const PollCard = (props) => {
   const { poll, user } = props;
 
-  let isVotedByUser = false;
-  if (user.auth && Object.keys(user.auth.votedPolls).includes(poll.poll_id)) {
-    isVotedByUser = true;
+  // let isVotedByUser = false;
+  // if (user.auth && Object.keys(user.auth.votedPolls).includes(poll.poll_id)) {
+  //   isVotedByUser = true;
+  // }
+
+  let boundOption = "unvoted-bound";
+  if (poll.private && !user.auth) {
+    boundOption = "close-bound"
+  } else if (user.auth && Object.keys(user.auth.votedPolls).includes(poll.poll_id)) {
+    boundOption = "voted-bound";
   }
 
   const renderOptions = () => {
@@ -23,7 +30,7 @@ const PollCard = (props) => {
   };
 
   return (
-    <div className={"poll-card-container " + (isVotedByUser ? "voted-bound" : "unvoted-bound")}>
+    <div className={"poll-card-container " + boundOption}>
       <div className="poll-question">
         {/* {poll.poll_id} */}
         {poll.question}

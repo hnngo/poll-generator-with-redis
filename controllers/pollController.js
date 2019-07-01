@@ -19,6 +19,7 @@ const {
   ATTR_USERID: POLL_USERID,
   ATTR_QUESTION: POLL_QUESTION,
   ATTR_OPTIONS: POLL_OPTIONS,
+  ATTR_PRIVATE: POLL_PRIVATE,
   ATTR_DATE_CREATED: POLL_DATE_CREATED,
   ATTR_LAST_UPDATED: POLL_LAST_UPDATED
 } = db.pollTable;
@@ -31,7 +32,7 @@ const {
   ATTR_ANSWER_INDEX: POLLANS_INDEX
 } = db.pollAnswerTable;
 
-const POLL_ALL_RELATED_ATTR = `${POLL_POLLID}, ${POLL_TABLE}.${POLL_USERID}, ${POLL_QUESTION}, ${POLL_OPTIONS}, ${POLL_DATE_CREATED}, ${POLL_LAST_UPDATED}, ${USER_NAME}, ${USER_EMAIL}`;
+const POLL_ALL_RELATED_ATTR = `${POLL_POLLID}, ${POLL_TABLE}.${POLL_USERID}, ${POLL_QUESTION}, ${POLL_OPTIONS}, ${POLL_PRIVATE}, ${POLL_DATE_CREATED}, ${POLL_LAST_UPDATED}, ${USER_NAME}`;
 
 //  @METHOD   POST
 //  @PATH     /pollser/create      
@@ -41,8 +42,11 @@ exports.postCreatePoll = async (req, res) => {
   const {
     question,
     options,
-    optionalStartingScores
+    optionalStartingScores,
+    isPrivate
   } = req.body;
+
+  //PENDING: Multiple choices
 
   // Check requirement
   if (!question.length || options.length <= 1) {
@@ -57,28 +61,32 @@ exports.postCreatePoll = async (req, res) => {
   const pollSettings = {};
   pollSettings.question = question;
   pollSettings.options = options;
+  pollSettings.isPrivate = isPrivate;
 
   // Optional Starting Scores
   if (optionalStartingScores) {
-    //PENDING: Check fields
+    //PENDING: Consider remove this field
     pollSettings.startingScores = optionalStartingScores;
   } else {
     pollSettings.startingScores = new Array(options.length).fill(0);
   }
 
   try {
+    // POSTGRES/ Storage
     const { rows } = await db.query(
-      `INSERT INTO ${POLL_TABLE} (${POLL_USERID}, ${POLL_QUESTION}, ${POLL_OPTIONS}) VALUES ($1, $2, $3) RETURNING *`,
+      `INSERT INTO ${POLL_TABLE} (${POLL_USERID}, ${POLL_QUESTION}, ${POLL_OPTIONS}, ${POLL_PRIVATE}) VALUES ($1, $2, $3, $4) RETURNING *`,
       [
         user_id,
         pollSettings.question,
-        pollSettings.options
+        pollSettings.options,
+        pollSettings.isPrivate
       ]
     );
 
-    // Store in redis server
+    // REDIS/ Storage
     const redisPollName = 'poll-' + rows[0][POLL_POLLID];
-    const opt_index = Array.apply(null, { length: rows[0][POLL_OPTIONS].length }).map(Number.call, Number);
+    const opt_index = Array.apply(null, { length: rows[0][POLL_OPTIONS].length })
+      .map(Number.call, Number);
     const args = _.flatten(_.zip(pollSettings.startingScores, opt_index));
     args.unshift(redisPollName);
 
