@@ -4,7 +4,8 @@ import {
   ACT_POLL_IS_CREATING,
   ACT_POLL_CREATE_SUCCESSFULLY,
   ACT_FETCH_POLL_ALL,
-  ACT_FETCH_YOUR_POLLS
+  ACT_FETCH_YOUR_POLLS,
+  ACT_VOTE_POLL
 } from '../constants';
 
 export const actFetchAllPoll = (user_id = null) => {
@@ -19,7 +20,7 @@ export const actFetchAllPoll = (user_id = null) => {
         queryString += `user_id=${user_id}`;
         type = ACT_FETCH_YOUR_POLLS;
       }
-      
+
       const res = await axios.get(queryString);
 
       dispatch({
@@ -57,3 +58,19 @@ export const actCreatePoll = (pollsetting) => {
     }
   }
 };
+
+export const actVotePoll = (pollid, ansIndex) => {
+  return async (dispatch) => {
+    // PENDING: Multi choices
+    const ans = JSON.stringify(ansIndex).replace('[', '').replace(']', '');
+    const res = await axios.get(`/pollser/vote/${pollid}?ans_index=${ans}`);
+
+    dispatch({
+      type: ACT_VOTE_POLL,
+      payload: {
+        pollid,
+        ansIndex
+      }
+    });
+  }
+}

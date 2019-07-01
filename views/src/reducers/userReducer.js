@@ -8,11 +8,12 @@ import {
   ACT_SIGN_UP_UNSUCCESSFULLY,
   ACT_SIGNING_UP,
   ACT_SIGN_OUT_USER,
-  ACT_CLEAR_AUTH_ERR_MSG
+  ACT_CLEAR_AUTH_ERR_MSG,
+  ACT_VOTE_POLL
 } from '../constants'
 
 const INITIAL_STATE = {
-  auth: undefined,
+  auth: null,
   isProcessingAuth: false,
   errMsg: "",
   socket: null
@@ -43,6 +44,15 @@ export default (state = INITIAL_STATE, action) => {
       return { ...state, auth: null };
     case ACT_CLEAR_AUTH_ERR_MSG:
       return { ...state, errMsg: "" };
+    case ACT_VOTE_POLL:
+      if (state.auth) {
+        const newAuth = { ...state.auth };
+        newAuth.votedPolls[action.payload.pollid] = action.payload.ansIndex;
+
+        return { ...state, auth: newAuth };
+      }
+
+      return { ...state }
     default:
       return state;
   }

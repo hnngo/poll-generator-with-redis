@@ -35,7 +35,8 @@ module.exports = {
     ATTR_POLLANS_ID: "pollanswer_id",
     ATTR_POLLID: "poll_id",
     ATTR_USERID: "user_id",
-    ATTR_ANSWER_INDEX: "answer_index"
+    ATTR_ANSWER_INDEX: "answer_index",
+    ATTR_ANONYMOUS: "anonymous"
   },
 
   // Functions

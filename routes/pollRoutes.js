@@ -11,9 +11,8 @@ router.post('/create', isLogin, pollController.postCreatePoll);
 //  @METHOD   GET
 //  @PATH     /vote/:pollid
 //  @DESC     Vote for a poll
-//  @QUERY    user_id     Vote by a user identity
-//            ans_index   Index of choice(s)
-router.get('/vote/:pollid', isLogin, pollController.getVotePoll);
+//  @QUERY    ans_index   Index of choice(s)
+router.get('/vote/:pollid', pollController.getVotePoll);
 
 //  @METHOD   GET
 //  @PATH     /pollser/all      

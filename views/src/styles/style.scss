@@ -413,6 +413,18 @@ $breakpoints: (
         margin-left: 30px;
       }
     }
+
+    .poll-vote-form {
+      form input {
+        margin: 0px 10px;
+      }
+
+      .btn-main-orange {
+        margin-top: 10px;
+        padding: 5px 20px;
+        background-color: #81f072
+      }
+    }
   }
 
   .poll-info {

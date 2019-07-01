@@ -17,7 +17,8 @@ const {
   ATTR_POLLANS_ID: POLLANS_ID,
   ATTR_POLLID: POLLANS_POLLID,
   ATTR_USERID: POLLANS_USERID,
-  ATTR_ANSWER_INDEX: POLLANS_INDEX
+  ATTR_ANSWER_INDEX: POLLANS_INDEX,
+  ATTR_ANONYMOUS: POLLANS_ANONYMOUS
 } = db.pollAnswerTable;
 
 module.exports = async (redisClient) => {
@@ -83,10 +84,17 @@ module.exports = async (redisClient) => {
               const pollid = d.split('update-')[1];
               const votees = Object.keys(formattedData);
               votees.forEach(async (v) => {
-                await db.query(
-                  `INSERT INTO ${POLLANS_TABLE} (${POLLANS_POLLID}, ${POLLANS_USERID}, ${POLLANS_INDEX}) VALUES ($1, $2, $3)`,
-                  [pollid, v, formattedData[v]]
-                );
+                if (v.includes('anonymous')) {
+                  await db.query(
+                    `INSERT INTO ${POLLANS_TABLE} (${POLLANS_POLLID}, ${POLLANS_ANONYMOUS}, ${POLLANS_INDEX}) VALUES ($1, $2, $3)`,
+                    [pollid, true, formattedData[v]]
+                  );
+                } else {
+                  await db.query(
+                    `INSERT INTO ${POLLANS_TABLE} (${POLLANS_POLLID}, ${POLLANS_USERID}, ${POLLANS_INDEX}) VALUES ($1, $2, $3)`,
+                    [pollid, v, formattedData[v]]
+                  );
+                }
 
                 // Delete from redis db
                 redisClient.del(d);

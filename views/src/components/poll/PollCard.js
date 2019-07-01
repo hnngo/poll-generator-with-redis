@@ -1,44 +1,83 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { formatTime } from '../utils';
+import {
+  actVotePoll
+} from '../../actions';
 
 const PollCard = (props) => {
+  const [choices, setChoices] = useState([]);
   const { poll, user } = props;
 
-  // let isVotedByUser = false;
-  // if (user.auth && Object.keys(user.auth.votedPolls).includes(poll.poll_id)) {
-  //   isVotedByUser = true;
-  // }
+  const isPrivate = poll.private;
+  const isAuth = user.auth;
+  const isVoted = isAuth && Object.keys(user.auth.votedPolls).includes(poll.poll_id);
 
+  let isAbleToVote = true;
   let boundOption = "unvoted-bound";
-  if (poll.private && !user.auth) {
+  if (isPrivate && !isAuth) {
+    isAbleToVote = false;
     boundOption = "close-bound"
-  } else if (user.auth && Object.keys(user.auth.votedPolls).includes(poll.poll_id)) {
+  } else if (isVoted) {
+    isAbleToVote = false;
     boundOption = "voted-bound";
   }
 
   const renderOptions = () => {
-    return poll.options.map((option, i) => {
+    if (isAbleToVote) {
       return (
-        <li
-          key={i}
-        >
-          {option}
-        </li>
-      );
-    });
+        <div className="poll-vote-form">
+          <form>
+            {
+              poll.options.map((option, i) => {
+                return (
+                  <div key={i}>
+                    <input
+                      type="radio"
+                      value={i}
+                      name={poll.poll_id}
+                      onChange={(e) => setChoices(+e.target.value)}
+                    />
+                    {option}
+                  </div>
+                );
+              })
+            }
+          </form>
+          <button
+            className="btn-main-orange"
+            onClick={() => props.actVotePoll(poll.poll_id, [choices])}
+          >
+            Submit Vote
+          </button>
+        </div>
+      )
+    }
+
+    return (
+      <ul>
+        {
+          poll.options.map((option, i) => {
+            return (
+              <li
+                key={i}
+              >
+                {option}
+              </li>
+            );
+          })
+        }
+      </ul>
+    )
   };
 
   return (
     <div className={"poll-card-container " + boundOption}>
       <div className="poll-question">
-        {/* {poll.poll_id} */}
         {poll.question}
       </div>
       <div className="poll-options">
-        <ul>
-          {renderOptions()}
-        </ul>
+        {renderOptions()}
       </div>
       <div className="poll-info">
         <div className="poll-user-created">
@@ -61,4 +100,6 @@ const mapStateToProps = ({ user }) => {
   return { user };
 }
 
-export default connect(mapStateToProps)(PollCard);
+export default connect(mapStateToProps, {
+  actVotePoll
+})(PollCard);

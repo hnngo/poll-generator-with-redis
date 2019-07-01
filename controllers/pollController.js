@@ -2,6 +2,7 @@ const _ = require('lodash');
 const acLog = require('../utils/acLog');
 const db = require('../models/postgres');
 const { redisClient } = require('../services/redis/redisClient');
+const uuidV4 = require('../utils/uuidV4');
 
 const LIMIT_PER_PAGE = 10;
 
@@ -29,7 +30,8 @@ const {
   ATTR_POLLANS_ID: POLLANS_ID,
   ATTR_POLLID: POLLANS_POLLID,
   ATTR_USERID: POLLANS_USERID,
-  ATTR_ANSWER_INDEX: POLLANS_INDEX
+  ATTR_ANSWER_INDEX: POLLANS_INDEX,
+  ATTR_ANONYMOUS: POLLANS_ANONYMOUS
 } = db.pollAnswerTable;
 
 const POLL_ALL_RELATED_ATTR = `${POLL_POLLID}, ${POLL_TABLE}.${POLL_USERID}, ${POLL_QUESTION}, ${POLL_OPTIONS}, ${POLL_PRIVATE}, ${POLL_DATE_CREATED}, ${POLL_LAST_UPDATED}, ${USER_NAME}`;
@@ -213,47 +215,50 @@ exports.getPollById = async (req, res) => {
 //  @DESC     Vote for a poll
 //  @QUERY    user_id     Vote by a user identity
 //            ans_index   Index of choice(s)
-exports.getVotePoll = (req, res) => {
+exports.getVotePoll = async (req, res) => {
   const { pollid } = req.params;
-  const { user_id, ans_index } = req.query;
+  const { ans_index } = req.query;
 
-  if (!pollid || !user_id || !ans_index) {
+  if (!pollid || !ans_index) {
     acLog("Missing information");
     return res.json({ message: "Missing information" });
   }
 
-  //PENDING: Check public poll and private poll here
+  // Check anonymous vote
+  let user_id = req.session.auth ? req.session.auth[USER_USERID] : ("anonymous-" + uuidV4());
 
-  // Write to redis db
+  // REDIS/ Write to redis db
   const redisPollName = 'poll-' + pollid;
   const redisUpdateName = 'update-' + pollid;
   const ans_arr = ans_index.split(',');
 
-  ans_arr.forEach((a) => {
-    const args = [redisPollName, "1", a];
-    redisClient.zincrby(args, (err) => {
-      if (err) throw err;
-    });
-  })
+  try {
+    ans_arr.forEach(async (a) => {
+      const args = [redisPollName, "1", a];
+      await redisClient.zincrbyAsync(args);
+    })
 
-  // Create the update key for poll
-  // update-[poll_id] '{ user_id1: [0], user_id2: [0, 1] }'
-  redisClient.get(redisUpdateName, (err, data) => {
-    if (err) throw err;
+    // REDIS/ Create the update key for poll
+    // update-[poll_id] '{ user_id1: [0], user_id2: [0, 1] }'
+    // update-[poll_id] '{ anonymous-uuid: [0] }'
+    const data = await redisClient.getAsync(redisUpdateName);
 
     // If not exist, create and store in redis
-    if (!data) {
-      let updatedData = {};
-      updatedData[user_id] = ans_arr;
-      redisClient.set(redisUpdateName, JSON.stringify(updatedData));
-      return;
+    let updatedData = {};
+    if (data) {
+      updatedData = JSON.parse(data);
     }
 
-    let updatedData = JSON.parse(data);
     updatedData[user_id] = ans_arr;
     redisClient.set(redisUpdateName, JSON.stringify(updatedData));
-    return;
-  });
+
+    // PENDING: Indicate user or anonymous
+    acLog(`User voted succesfully poll ${pollid}`);
+    return res.send();
+  } catch (err) {
+    acLog(err);
+    return res.send({ errMsg: err });
+  }
 };
 
 //  @METHOD   DELETE
