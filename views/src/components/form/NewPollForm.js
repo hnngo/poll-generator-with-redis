@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { reduxForm, Field, change, reset } from 'redux-form';
 import { connect } from 'react-redux';
 import InputField from './InputField';
@@ -8,22 +8,10 @@ import {
 } from '../../actions';
 
 const NewPollForm = (props) => {
-  const { formValues, poll } = props;
+  const { poll } = props;
   const [numberOfOption, setNumberOfOption] = useState(2);
   const [isCreating, setIsCreating] = useState(false);
 
-  useEffect(() => {
-    console.log(formValues);
-
-    // Check if option
-    if (formValues) {
-      let lastOption = formValues["option" + (numberOfOption - 1)];
-      if (lastOption) {
-        setNumberOfOption(numberOfOption + 1);
-      }
-    }
-
-  }, [formValues]);
 
   const handleClickResetRow = () => {
     // Unregister Field in redux form
@@ -47,6 +35,12 @@ const NewPollForm = (props) => {
           type="text"
           placeholder="Enter poll option"
           autocomplete="off"
+          onChange={(e) => {
+            // Increase the number of rows of option
+            if (e.target.name === ("option" + (numberOfOption - 1))) {
+              setNumberOfOption(numberOfOption + 1);
+            }
+          }}
         />
       )
     }
@@ -182,14 +176,7 @@ const validate = values => {
 }
 
 
-const mapStateToProps = ({ form, poll }) => {
-  if (form.newPoll) {
-    return {
-      formValues: form.newPoll.values,
-      poll
-    };
-  }
-
+const mapStateToProps = ({ poll }) => {
   return { poll };
 }
 

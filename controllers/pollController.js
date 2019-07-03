@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const acLog = require('../utils/acLog');
 const db = require('../models/postgres');
+const redis = require('redis');
 const { redisClient } = require('../services/redis/redisClient');
 const uuidV4 = require('../utils/uuidV4');
 
@@ -177,7 +178,7 @@ exports.getPollById = async (req, res) => {
     return res.json({ message: "Missing information" });
   }
 
-  //PENDING: Fetch all poll if vote publicly by anonymous
+  // PENDING: Fetch all poll if vote publicly by anonymous
   try {
     const { rows } = await db.query(`
     SELECT ${POLL_ALL_RELATED_ATTR}
@@ -219,11 +220,20 @@ exports.getVotePoll = async (req, res) => {
   const ans_arr = ans_index.split(',');
 
   try {
-    ans_arr.forEach(async (a) => {
+    ans_arr.forEach(async (a, i) => {
       const args = [redisPollName, "1", a];
       await sleep(10);
       await redisClient.zincrbyAsync(args);
-    })
+
+      // PENDING: If finish stream back the value
+      if (i === ans_arr.length - 1) {
+        await sleep(10);
+        // redisClient.publish("update-score", redisPollName);
+        const redisClient = redis.createClient();
+        redisClient.publish("update-score", redisPollName);
+      }
+    });
+
 
     // REDIS/ Create the update key for poll
     // update-[poll_id] '{ user_id1: [0], user_id2: [0, 1] }'
@@ -242,9 +252,9 @@ exports.getVotePoll = async (req, res) => {
     await redisClient.setAsync(redisUpdateName, await JSON.stringify(updatedData));
 
     if (user_id.startsWith("anonymous")) {
-      acLog(`One anonymouse voted succesfully poll ${pollid}`);
+      acLog(`An anonymous voted poll ${pollid} choices ${ans_index}`);
     } else {
-      acLog(`User ${user_id} voted succesfully poll ${pollid}`);
+      acLog(`User ${user_id} voted poll ${pollid} choices ${ans_index}`);
     }
 
     // PENDING: Trigger socketio
