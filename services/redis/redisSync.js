@@ -33,10 +33,8 @@ module.exports = async (redisClient) => {
        LIMIT 1000`
     );
 
-    const pollArr = rows;
-
     // Create each poll in redis db if it not existed
-    pollArr.forEach(async (poll, i) => {
+    rows.forEach(async (poll, i) => {
       const redisPollSet = `poll-${poll[POLL_POLLID]}`;
 
       await sleep(10);
@@ -82,18 +80,16 @@ module.exports = async (redisClient) => {
           await sleep(10);
           const data = await redisClient.getAsync(d);
           let cursor = +(await redisClient.getAsync("cursor-" + d));
-          if (!cursor) {
-            cursor = -1;
-          }
+          if (!cursor) { cursor = -1; }
 
-          console.log(cursor)
-          
           // POSTGRES/
           const formattedData = JSON.parse(data);
           const pollid = d.split('update-')[1];
           const votees = Object.keys(formattedData);
-          console.log("In sync: ", Object.keys(formattedData).length);
+          const numberOfRemainingVotes = votees.length - 1 - cursor;
+          if (!numberOfRemainingVotes) return;
 
+          console.log("In sync: ", numberOfRemainingVotes);
           votees.forEach(async (v, i) => {
             if (i <= cursor) {
               return;

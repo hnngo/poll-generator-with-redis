@@ -21,6 +21,7 @@ const {
   ATTR_QUESTION: POLL_QUESTION,
   ATTR_OPTIONS: POLL_OPTIONS,
   ATTR_PRIVATE: POLL_PRIVATE,
+  ATTR_MULTIPLE_CHOICE: POLL_MULTIPLE_CHOICE,
   ATTR_DATE_CREATED: POLL_DATE_CREATED,
   ATTR_LAST_UPDATED: POLL_LAST_UPDATED
 } = db.pollTable;
@@ -34,7 +35,7 @@ const {
   ATTR_ANONYMOUS: POLLANS_ANONYMOUS
 } = db.pollAnswerTable;
 
-const POLL_ALL_RELATED_ATTR = `${POLL_POLLID}, ${POLL_TABLE}.${POLL_USERID}, ${POLL_QUESTION}, ${POLL_OPTIONS}, ${POLL_PRIVATE}, ${POLL_DATE_CREATED}, ${POLL_LAST_UPDATED}, ${USER_NAME}`;
+const POLL_ALL_RELATED_ATTR = `${POLL_POLLID}, ${POLL_TABLE}.${POLL_USERID}, ${POLL_QUESTION}, ${POLL_OPTIONS}, ${POLL_MULTIPLE_CHOICE}, ${POLL_PRIVATE}, ${POLL_DATE_CREATED}, ${POLL_LAST_UPDATED}, ${USER_NAME}`;
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -48,11 +49,9 @@ exports.postCreatePoll = async (req, res) => {
   const {
     question,
     options,
-    optionalStartingScores,
-    isPrivate
+    isPrivate,
+    multipleChoice
   } = req.body;
-
-  //PENDING: Multiple choices
 
   // Check requirement
   if (!question.length || options.length <= 1) {
@@ -63,46 +62,27 @@ exports.postCreatePoll = async (req, res) => {
     return res.json({ message: "Cannot connect to Redis server" });
   }
 
-  // Init poll setting
-  const pollSettings = {};
-  pollSettings.question = question;
-  pollSettings.options = options;
-  pollSettings.isPrivate = isPrivate;
-
-  // Optional Starting Scores
-  if (optionalStartingScores) {
-    //PENDING: Consider remove this field
-    pollSettings.startingScores = optionalStartingScores;
-  } else {
-    pollSettings.startingScores = new Array(options.length).fill(0);
-  }
-
   try {
     // POSTGRES/ Storage
     const { rows } = await db.query(
-      `INSERT INTO ${POLL_TABLE} (${POLL_USERID}, ${POLL_QUESTION}, ${POLL_OPTIONS}, ${POLL_PRIVATE}) VALUES ($1, $2, $3, $4) RETURNING *`,
+      `INSERT INTO ${POLL_TABLE} (${POLL_USERID}, ${POLL_QUESTION}, ${POLL_OPTIONS}, ${POLL_PRIVATE}, ${POLL_MULTIPLE_CHOICE}) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
       [
         user_id,
-        pollSettings.question,
-        pollSettings.options,
-        pollSettings.isPrivate
+        question,
+        options,
+        isPrivate,
+        multipleChoice
       ]
     );
 
     // REDIS/ Storage
     const redisPollName = 'poll-' + rows[0][POLL_POLLID];
-    const opt_index = Array.apply(null, { length: rows[0][POLL_OPTIONS].length })
+    const startingScores = new Array(options.length).fill(0);
+    const option_index = Array.apply(null, { length: rows[0][POLL_OPTIONS].length })
       .map(Number.call, Number);
-    const args = _.flatten(_.zip(pollSettings.startingScores, opt_index));
+    const args = _.flatten(_.zip(startingScores, option_index));
     args.unshift(redisPollName);
-
-    redisClient.exists(redisPollName, (isExisted) => {
-      if (!isExisted) {
-        redisClient.zadd(args, (err) => {
-          if (err) throw err;
-        });
-      }
-    });
+    await redisClient.zaddAsync(args);
 
     acLog(`User id ${rows[0][POLL_USERID]} created successfully poll id ${rows[0][POLL_POLLID]}`);
     return res.send(rows[0]);
@@ -223,6 +203,8 @@ exports.getVotePoll = async (req, res) => {
   const { pollid } = req.params;
   const { ans_index } = req.query;
 
+  // PENDING: Check if ans_index out of range
+
   if (!pollid || !ans_index) {
     acLog("Missing information");
     return res.json({ message: "Missing information" });
@@ -259,10 +241,13 @@ exports.getVotePoll = async (req, res) => {
     await sleep(10);
     await redisClient.setAsync(redisUpdateName, await JSON.stringify(updatedData));
 
-    // PENDING: Indicate user or anonymous
-    // acLog(`User voted succesfully poll ${pollid}`);
+    if (user_id.startsWith("anonymous")) {
+      acLog(`One anonymouse voted succesfully poll ${pollid}`);
+    } else {
+      acLog(`User ${user_id} voted succesfully poll ${pollid}`);
+    }
 
-    // Trigger socketio
+    // PENDING: Trigger socketio
     return res.send();
   } catch (err) {
     acLog(err);

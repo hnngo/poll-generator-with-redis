@@ -26,6 +26,7 @@ module.exports = {
     ATTR_QUESTION: "question",
     ATTR_OPTIONS: "options",
     ATTR_PRIVATE: "private",
+    ATTR_MULTIPLE_CHOICE: "multiple_choice",
     ATTR_DATE_CREATED: "date_created",
     ATTR_LAST_UPDATED: "last_updated",
   },

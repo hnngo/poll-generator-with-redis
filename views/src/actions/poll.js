@@ -61,6 +61,7 @@ export const actCreatePoll = (pollsetting) => {
 
 export const actVotePoll = (pollid, ansIndex) => {
   return async (dispatch) => {
+    console.log(ansIndex);
     // PENDING: Multi choices
     const ans = JSON.stringify(ansIndex).replace('[', '').replace(']', '');
     const res = await axios.get(`/pollser/vote/${pollid}?ans_index=${ans}`);

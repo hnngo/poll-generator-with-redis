@@ -12,7 +12,6 @@ const PollCard = (props) => {
   const isPrivate = poll.private;
   const isAuth = user.auth;
   const isVoted = isAuth && Object.keys(user.auth.votedPolls).includes(poll.poll_id);
-  console.log(poll)
   let isAbleToVote = true;
   let boundOption = "unvoted-bound";
   if (isPrivate && !isAuth) {
@@ -21,6 +20,39 @@ const PollCard = (props) => {
   } else if (isVoted) {
     isAbleToVote = false;
     boundOption = "voted-bound";
+  }
+
+  const renderChoices = (i) => {
+    if (poll.multiple_choice) {
+      return (
+        <input
+          type="checkbox"
+          value={i}
+          name={poll.poll_id}
+          onChange={(e) => {
+            const { value, checked } = e.target;
+            let newChoices = choices;
+
+            if (checked) {
+              newChoices.push(+value);
+            } else {
+              newChoices.splice(choices.indexOf(+value), 1);
+            }
+
+            setChoices(newChoices);
+          }}
+        />
+      );
+    }
+
+    return (
+      <input
+        type="radio"
+        value={i}
+        name={poll.poll_id}
+        onChange={(e) => setChoices([+e.target.value])}
+      />
+    );
   }
 
   const renderOptions = () => {
@@ -36,12 +68,7 @@ const PollCard = (props) => {
                       {poll.scores[i]}
                     </div>
                     <div className="col-11">
-                      <input
-                        type="radio"
-                        value={i}
-                        name={poll.poll_id}
-                        onChange={(e) => setChoices(+e.target.value)}
-                      />
+                      {renderChoices(i)}
                       {option}
                     </div>
                   </div>
@@ -51,7 +78,7 @@ const PollCard = (props) => {
           </form>
           <button
             className="btn-main-orange"
-            onClick={() => props.actVotePoll(poll.poll_id, [choices])}
+            onClick={() => props.actVotePoll(poll.poll_id, choices)}
           >
             Submit Vote
           </button>
