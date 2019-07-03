@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
+import _ from 'lodash';
 import { formatTime } from '../utils';
 import {
   actVotePoll
@@ -56,6 +57,17 @@ const PollCard = (props) => {
   }
 
   const renderOptions = () => {
+    // Prepare progress bar
+    const scoresNum = poll.scores.map(s => +s);
+    const maxVotes = _.max(scoresNum);
+    const barProgress = poll.scores.map((s) => {
+      if (maxVotes === 0) {
+        return 0;
+      }
+
+      return (+s) * 100 / maxVotes;
+    });
+
     if (isAbleToVote) {
       return (
         <div className="poll-vote-form">
@@ -70,6 +82,21 @@ const PollCard = (props) => {
                     <div className="col-11">
                       {renderChoices(i)}
                       {option}
+                    </div>
+                    <div className="col-12 py-2">
+                      <div className="progress">
+                        <div
+                          className="progress-bar progress-bar-striped  progress-bar-animated"
+                          role="progressbar"
+                          style={{
+                            width: `${barProgress[i]}%`,
+                            backgroundColor: "#007B4F"
+                          }}
+                          aria-valuenow="10"
+                          aria-valuemin="0"
+                          aria-valuemax="100"
+                        />
+                      </div>
                     </div>
                   </div>
                 );
@@ -100,6 +127,21 @@ const PollCard = (props) => {
                   </div>
                   <div className="col-11">
                     {option}
+                  </div>
+                  <div className="col-12 py-2">
+                    <div className="progress">
+                      <div
+                        className="progress-bar progress-bar-striped progress-bar-animated"
+                        role="progressbar"
+                        style={{
+                          width: `${barProgress[i]}%`,
+                          backgroundColor: "#007B4F"
+                        }}
+                        aria-valuenow="10"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                      />
+                    </div>
                   </div>
                 </div>
               </li>

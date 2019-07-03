@@ -404,7 +404,7 @@ $breakpoints: (
   .poll-options {
     @include fontSetting(default, 1rem, dim-black);
     text-align: left;
-    padding: 0px 0px 10px 20px;
+    padding: 0px 20px 10px 20px;
 
     ul {
       list-style: circle;

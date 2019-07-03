@@ -65,7 +65,6 @@ module.exports = async (redisClient) => {
 
     // Set interval updating postgres
     setInterval(async () => {
-      acLog("Redis Interval checking");
       try {
         // REDIS/ Check if key pattern update-
         // update-[poll_id] '{ user_id1: [0], user_id2: [0, 1] }'
