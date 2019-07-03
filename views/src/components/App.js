@@ -11,7 +11,7 @@ import SignInForm from './form/SignInForm';
 import SignUpForm from './form/SignUpForm';
 import HeaderLightBar from './HeaderLightBar';
 import YourPolls from './poll/YourPolls';
-import { actSaveSocket } from '../actions';
+import { actSaveSocket, actPollUpdateScore } from '../actions';
 import {
   TAB_CURRENT_POLL,
   TAB_NEW_POLL,
@@ -22,7 +22,7 @@ import {
 
 
 const App = (props) => {
-  const { actSaveSocket } = props;
+  const { actSaveSocket, actPollUpdateScore } = props;
   const [viewTab, setViewTab] = useState(TAB_CURRENT_POLL);
 
   // Connect socketio
@@ -30,11 +30,16 @@ const App = (props) => {
     // Connect socket io
     const socket = socketIOClient('http://localhost:5000');
 
+    // Receive updated scores
+    socket.on("update-poll", (info) => {
+      actPollUpdateScore(info);
+    })
+
     // Save the connection info
     actSaveSocket(socket);
 
-    return () => socket.close();
-  }, [actSaveSocket]);
+    return () => socket.disconnect(true);
+  }, [actSaveSocket, actPollUpdateScore]);
 
   const renderContent = () => {
     if (!props.socket) {
@@ -83,4 +88,7 @@ const mapStateToProps = ({ user }) => {
   return { socket };
 }
 
-export default connect(mapStateToProps, { actSaveSocket })(App);
+export default connect(mapStateToProps, {
+  actSaveSocket,
+  actPollUpdateScore
+})(App);

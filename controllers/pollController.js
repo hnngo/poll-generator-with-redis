@@ -222,7 +222,7 @@ exports.getVotePoll = async (req, res) => {
   try {
     ans_arr.forEach(async (a, i) => {
       const args = [redisPollName, "1", a];
-      await sleep(10);
+      // await sleep(10);
       await redisClient.zincrbyAsync(args);
 
       // PENDING: If finish stream back the value
@@ -238,7 +238,7 @@ exports.getVotePoll = async (req, res) => {
     // REDIS/ Create the update key for poll
     // update-[poll_id] '{ user_id1: [0], user_id2: [0, 1] }'
     // update-[poll_id] '{ anonymous-uuid: [0] }'
-    await sleep(10);
+    // await sleep(10);
     const data = await redisClient.getAsync(redisUpdateName);
 
     // If data not exist, create and store in redis
@@ -248,7 +248,7 @@ exports.getVotePoll = async (req, res) => {
     }
 
     updatedData[user_id] = ans_arr;
-    await sleep(10);
+    // await sleep(10);
     await redisClient.setAsync(redisUpdateName, await JSON.stringify(updatedData));
 
     if (user_id.startsWith("anonymous")) {

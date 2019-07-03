@@ -5,7 +5,8 @@ import {
   ACT_POLL_CREATE_SUCCESSFULLY,
   ACT_FETCH_POLL_ALL,
   ACT_FETCH_YOUR_POLLS,
-  ACT_VOTE_POLL
+  ACT_VOTE_POLL,
+  ACT_POLL_UPDATE_SCORE
 } from '../constants';
 
 export const actFetchAllPoll = (user_id = null) => {
@@ -73,4 +74,17 @@ export const actVotePoll = (pollid, ansIndex) => {
       }
     });
   }
+}
+
+export const actPollUpdateScore = (info) => {
+  const { pollid , res } = info;
+  const scores = _.fromPairs(_.chunk(res, 2));
+
+  return {
+    type: ACT_POLL_UPDATE_SCORE,
+    payload: {
+      pollid,
+      scores
+    }
+  };
 }
