@@ -71,61 +71,80 @@ module.exports = async (redisClient) => {
         // update-[poll_id] '{ user_id1: [0], user_id2: [0, 1] }'
         await sleep(10);
         const result = await redisClient.scanAsync([0, "MATCH", "update-*"]);
-        if (!result[1].length) {
+        if (result[1].length) {
+          // Write update to postgres
+          result[1].forEach(async (d, i) => {
+            await sleep(10);
+            const data = await redisClient.getAsync(d);
+            let cursor = await redisClient.getAsync("cursor-" + d);
+            if (!cursor) { cursor = -1; }
+
+            // POSTGRES/
+            const formattedData = JSON.parse(data);
+            const pollid = d.split('update-')[1];
+            const votees = Object.keys(formattedData);
+            const numberOfRemainingVotes = votees.length - 1 - (+cursor);
+            if (!numberOfRemainingVotes) return;
+
+            acLog(`Flush to Postgres: ${numberOfRemainingVotes} update(s)`);
+            votees.forEach(async (v, i) => {
+              if (i <= cursor) {
+                return;
+              }
+
+              if (v.includes('anonymous')) {
+                // await db.query('BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE')
+                await db.query(
+                  `INSERT INTO ${POLLANS_TABLE} (${POLLANS_POLLID}, ${POLLANS_ANONYMOUS}, ${POLLANS_INDEX}) VALUES ($1, $2, $3)`,
+                  [pollid, true, formattedData[v]]
+                );
+                // await db.query('COMMIT');
+              } else {
+
+                // await db.query('BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE');
+                await db.query(
+                  `INSERT INTO ${POLLANS_TABLE} (${POLLANS_POLLID}, ${POLLANS_USERID}, ${POLLANS_INDEX}) VALUES ($1, $2, $3)`,
+                  [pollid, v, formattedData[v]]
+                );
+                // await db.query('COMMIT');
+              }
+
+              if (i === votees.length - 1) {
+                await redisClient.setAsync("cursor-" + d, i);
+              }
+            });
+
+            await db.query(
+              `UPDATE ${POLL_TABLE}
+                 SET ${POLL_LAST_UPDATED} = DEFAULT
+                 WHERE ${POLL_POLLID} = $1`,
+              [pollid]
+            );
+
+            await sleep(10);
+            await redisClient.setAsync("last-" + d, new Date());
+            // await redisClient.delAsync(d);
+          });
+        }
+
+        // REDIS/ Check any ideal update exist
+        await sleep(10);
+        const updateTime = await redisClient.scanAsync([0, "MATCH", "last-update-*"]);
+        if (!updateTime[1].length) {
           return;
         }
 
-        // Write update to postgres
-        result[1].forEach(async (d, i) => {
+        updateTime[1].forEach(async (p) => {
           await sleep(10);
-          const data = await redisClient.getAsync(d);
-          let cursor = +(await redisClient.getAsync("cursor-" + d));
-          if (!cursor) { cursor = -1; }
-
-          // POSTGRES/
-          const formattedData = JSON.parse(data);
-          const pollid = d.split('update-')[1];
-          const votees = Object.keys(formattedData);
-          const numberOfRemainingVotes = votees.length - 1 - cursor;
-          if (!numberOfRemainingVotes) return;
-
-          console.log("In sync: ", numberOfRemainingVotes);
-          votees.forEach(async (v, i) => {
-            if (i <= cursor) {
-              return;
-            }
-
-            if (v.includes('anonymous')) {
-              // await db.query('BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE')
-              await db.query(
-                `INSERT INTO ${POLLANS_TABLE} (${POLLANS_POLLID}, ${POLLANS_ANONYMOUS}, ${POLLANS_INDEX}) VALUES ($1, $2, $3)`,
-                [pollid, true, formattedData[v]]
-              );
-              // await db.query('COMMIT');
-            } else {
-
-              // await db.query('BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE');
-              await db.query(
-                `INSERT INTO ${POLLANS_TABLE} (${POLLANS_POLLID}, ${POLLANS_USERID}, ${POLLANS_INDEX}) VALUES ($1, $2, $3)`,
-                [pollid, v, formattedData[v]]
-              );
-              // await db.query('COMMIT');
-            }
-
-            if (i === votees.length - 1) {
-              cursor = i;
-              await redisClient.setAsync("cursor-" + d, cursor);
-            }
-          });
-
-          // await sleep(10);
-          // await redisClient.delAsync(d);
-          await db.query(
-            `UPDATE ${POLL_TABLE}
-                 SET ${POLL_LAST_UPDATED} = DEFAULT
-                 WHERE ${POLL_POLLID} = $1`,
-            [pollid]
-          );
+          const pollid = p.split("last-update-")[1];
+          const lastTimeUpdate = await redisClient.getAsync(p);
+          
+          if(((new Date()) - (new Date(lastTimeUpdate))) > 5 * 60 * 1000) {
+            await sleep(10);
+            await redisClient.delAsync(`update-${pollid}`);
+            await redisClient.delAsync(`cursor-update-${pollid}`);
+            await redisClient.delAsync(p);
+          }
         });
       } catch (err) {
         acLog(err);
