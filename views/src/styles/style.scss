@@ -456,6 +456,21 @@ $breakpoints: (
       @include fontSetting(default, 0.9rem, dim-black);     
     }
   }
+
+  .poll-tags {
+    @include pos(absolute, 10px, 5px);
+    @include display(flex, flex-start);
+
+    .tags {
+      margin: 0px 5px;
+      @include fontSetting(default, 0.7rem, white, 400);
+      border-radius: 5px;
+      // background: map-get($map: $theme-colors, $key: danger-text);
+      background: #54668d;
+      padding: 3px 6px;
+      box-shadow: 0px 0px 2px 0px map-get($map: $theme-colors, $key: shadow-dark)
+    }
+  }
 }
 
 .voted-bound {

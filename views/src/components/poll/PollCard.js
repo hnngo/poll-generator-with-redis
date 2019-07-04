@@ -13,6 +13,7 @@ const PollCard = (props) => {
   const isPrivate = poll.private;
   const isAuth = user.auth;
   const isVoted = isAuth && Object.keys(user.auth.votedPolls).includes(poll.poll_id);
+  const isYourPoll = isAuth && (user.auth.user_id === poll.user_id);
   let isAbleToVote = true;
   let barColor = "#007B4F";
   let boundOption = "unvoted-bound";
@@ -118,8 +119,25 @@ const PollCard = (props) => {
     );
   };
 
+  const renderPollTags = () => {
+    return (
+      <div className="poll-tags">
+        {
+          isYourPoll ? 
+          <div className="tags">Your Poll</div> : <div />
+        }
+        <div className="tags">
+          {
+            isPrivate ? "Private Poll" : "Public Poll"
+          }
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={"poll-card-container " + boundOption}>
+      {renderPollTags()}
       <div className="poll-question">
         {poll.question}
       </div>
