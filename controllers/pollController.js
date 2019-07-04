@@ -272,6 +272,12 @@ exports.deletePollById = async (req, res) => {
   const { pollid } = req.params;
 
   try {
+    // REDIS/ Clear all the related key to pollid
+    await redisClient.delAsync(`update-${pollid}`);
+    await redisClient.delAsync(`cursor-update-${pollid}`);
+    await redisClient.delAsync(`last-update-${pollid}`);
+
+    // POSTGRES/ Delete poll from Postgres
     await db.query(
       `DELETE FROM ${POLL_TABLE} WHERE ${POLL_POLLID} = $1`,
       [pollid]

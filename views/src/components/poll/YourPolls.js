@@ -24,6 +24,7 @@ const YourPolls = (props) => {
         <PollCard
           key={i}
           poll={poll}
+          triggerRender={poll.scores}
         />
       )
     })

@@ -423,8 +423,8 @@ $breakpoints: (
 
         .poll-vote-header {
           @include display(flex, space-between);
-          margin: 8px 0px 10px 0px;
-          
+          margin-top: 4px;
+
           input {
             margin: 0px 10px 0px 0px;
           }
@@ -432,6 +432,12 @@ $breakpoints: (
           .poll-scores {
             @include fontSetting(courier, 18px, black, bold, normal, 1px);
           }
+        }
+
+        .poll-voted-user {
+          @include fontSetting(default, 0.8rem, black, 400, normal, 1px);
+          text-align: right;
+          padding-top: 3px;
         }
       }
 

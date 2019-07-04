@@ -69,14 +69,21 @@ const PollCard = (props) => {
     const barProgress = poll.scores.map((s) => {
       return (maxVotes === 0) ? 0 : (+s) * 100 / maxVotes;
     });
+    const optionsVoteByUser = isVoted ? user.auth.votedPolls[poll.poll_id] : [];
 
     return (
       <div className="poll-vote-form">
         <form>
           {
             poll.options.map((option, i) => {
+              let border = optionsVoteByUser.includes(i) ? `2px solid ${barColor}` : "";
+
               return (
-                <div key={i} className="poll-vote-row">
+                <div
+                  key={i}
+                  className="poll-vote-row"
+                  style={{ border }}
+                >
                   <div className="poll-vote-header">
                     <div>
                       {renderChoices(i)}
@@ -98,6 +105,9 @@ const PollCard = (props) => {
                       aria-valuemin="0"
                       aria-valuemax="100"
                     />
+                  </div>
+                  <div className="poll-voted-user">
+                    {optionsVoteByUser.includes(i) ? "Voted by you" : ""}
                   </div>
                 </div>
               );
@@ -123,8 +133,8 @@ const PollCard = (props) => {
     return (
       <div className="poll-tags">
         {
-          isYourPoll ? 
-          <div className="tags">Your Poll</div> : <div />
+          isYourPoll ?
+            <div className="tags">Your Poll</div> : <div />
         }
         <div className="tags">
           {
@@ -154,7 +164,7 @@ const PollCard = (props) => {
           </div>
         </div>
         <div className="poll-updated-time">
-          Last updated {formatTime(new Date() - new Date(poll.last_updated))}
+          Last voted {formatTime(new Date() - new Date(poll.last_updated))}
         </div>
       </div>
     </div>

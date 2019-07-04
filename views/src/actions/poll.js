@@ -63,7 +63,7 @@ export const actCreatePoll = (pollsetting) => {
 export const actVotePoll = (pollid, ansIndex) => {
   return async (dispatch) => {
     const ans = JSON.stringify(ansIndex).replace('[', '').replace(']', '');
-    const res = await axios.get(`/pollser/vote/${pollid}?ans_index=${ans}`);
+    await axios.get(`/pollser/vote/${pollid}?ans_index=${ans}`);
 
     // PENDING: Direct to analysis panel
     dispatch({
@@ -77,9 +77,9 @@ export const actVotePoll = (pollid, ansIndex) => {
 }
 
 export const actPollUpdateScore = (info) => {
-  const { pollid , res } = info;
+  const { pollid, res } = info;
   const scores = _.fromPairs(_.chunk(res, 2));
-
+  console.log()
   return {
     type: ACT_POLL_UPDATE_SCORE,
     payload: {

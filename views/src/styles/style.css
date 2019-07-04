@@ -515,7 +515,7 @@ body {
   -webkit-box-direction: normal;
       -ms-flex-direction: row;
           flex-direction: row;
-  margin: 8px 0px 10px 0px;
+  margin-top: 4px;
 }
 
 .poll-card-container .poll-options .poll-vote-form .poll-vote-row .poll-vote-header input {
@@ -529,6 +529,17 @@ body {
   font-weight: bold;
   font-style: normal;
   letter-spacing: 1px;
+}
+
+.poll-card-container .poll-options .poll-vote-form .poll-vote-row .poll-voted-user {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  color: black;
+  font-size: 0.8rem;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: 1px;
+  text-align: right;
+  padding-top: 3px;
 }
 
 .poll-card-container .poll-options .poll-vote-form .btn-main-orange {
