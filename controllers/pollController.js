@@ -82,6 +82,9 @@ exports.postCreatePoll = async (req, res) => {
     const option_index = Array.apply(null, { length: rows[0][POLL_OPTIONS].length })
       .map(Number.call, Number);
     const args = _.flatten(_.zip(startingScores, option_index));
+
+    // PENDING: Check REDIS/ pipeline: 1000 polls max
+
     args.unshift(redisPollName);
     await redisClient.zaddAsync(args);
 
@@ -178,6 +181,7 @@ exports.getPollById = async (req, res) => {
     return res.json({ message: "Missing information" });
   }
 
+  // PENDING: Consider to remove this poll
   // PENDING: Fetch all poll if vote publicly by anonymous
   try {
     const { rows } = await db.query(`
@@ -257,7 +261,6 @@ exports.getVotePoll = async (req, res) => {
       acLog(`User ${user_id} voted poll ${pollid} choices ${ans_index}`);
     }
 
-    // PENDING: Trigger socketio
     return res.send();
   } catch (err) {
     acLog(err);
@@ -272,7 +275,10 @@ exports.deletePollById = async (req, res) => {
   const { pollid } = req.params;
 
   try {
+    // PENDING: Check case delete when voting
+
     // REDIS/ Clear all the related key to pollid
+    await redisClient.delAsync(`poll-${pollid}`);
     await redisClient.delAsync(`update-${pollid}`);
     await redisClient.delAsync(`cursor-update-${pollid}`);
     await redisClient.delAsync(`last-update-${pollid}`);
@@ -282,6 +288,8 @@ exports.deletePollById = async (req, res) => {
       `DELETE FROM ${POLL_TABLE} WHERE ${POLL_POLLID} = $1`,
       [pollid]
     );
+
+    acLog(`User ${req.session.auth[USER_USERID]} delete poll ${pollid}`)
     return res.send();
   } catch (err) {
     acLog(err);

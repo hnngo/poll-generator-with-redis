@@ -3,7 +3,8 @@ import { connect } from 'react-redux';
 import _ from 'lodash';
 import { formatTime } from '../utils';
 import {
-  actVotePoll
+  actVotePoll,
+  actPollDelete
 } from '../../actions';
 
 const PollCard = (props) => {
@@ -14,6 +15,7 @@ const PollCard = (props) => {
   const isAuth = user.auth;
   const isVoted = isAuth && Object.keys(user.auth.votedPolls).includes(poll.poll_id);
   const isYourPoll = isAuth && (user.auth.user_id === poll.user_id);
+
   let isAbleToVote = true;
   let barColor = "#007B4F";
   let boundOption = "unvoted-bound";
@@ -145,6 +147,21 @@ const PollCard = (props) => {
     );
   }
 
+  const renderDeleteBtn = () => {
+    if (isAuth && isYourPoll) {
+      return (
+        <div
+          className="btn-main-danger"
+          onClick={() => props.actPollDelete(poll.poll_id)}
+        >
+          Delete Poll
+        </div>
+      )
+    }
+
+    return <div />;
+  }
+
   return (
     <div className={"poll-card-container " + boundOption}>
       {renderPollTags()}
@@ -167,6 +184,9 @@ const PollCard = (props) => {
           Last voted {formatTime(new Date() - new Date(poll.last_updated))}
         </div>
       </div>
+      <div className="poll-delete">
+        {renderDeleteBtn()}
+      </div>
     </div>
   );
 }
@@ -176,5 +196,6 @@ const mapStateToProps = ({ user }) => {
 }
 
 export default connect(mapStateToProps, {
-  actVotePoll
+  actVotePoll,
+  actPollDelete
 })(PollCard);

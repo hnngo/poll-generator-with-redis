@@ -6,7 +6,8 @@ import {
   ACT_FETCH_POLL_ALL,
   ACT_FETCH_YOUR_POLLS,
   ACT_VOTE_POLL,
-  ACT_POLL_UPDATE_SCORE
+  ACT_POLL_UPDATE_SCORE,
+  ACT_POLL_DELETE_POLL
 } from '../constants';
 
 export const actFetchAllPoll = (user_id = null) => {
@@ -65,7 +66,6 @@ export const actVotePoll = (pollid, ansIndex) => {
     const ans = JSON.stringify(ansIndex).replace('[', '').replace(']', '');
     await axios.get(`/pollser/vote/${pollid}?ans_index=${ans}`);
 
-    // PENDING: Direct to analysis panel
     dispatch({
       type: ACT_VOTE_POLL,
       payload: {
@@ -87,4 +87,13 @@ export const actPollUpdateScore = (info) => {
       scores
     }
   };
+}
+
+export const actPollDelete = (pollid) => {
+  axios.delete(`/pollser/${pollid}`);
+
+  return {
+    type: ACT_POLL_DELETE_POLL,
+    payload: pollid
+  }
 }

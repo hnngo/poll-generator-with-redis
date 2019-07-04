@@ -3,7 +3,8 @@ import {
   ACT_POLL_CREATE_SUCCESSFULLY,
   ACT_FETCH_POLL_ALL,
   ACT_FETCH_YOUR_POLLS,
-  ACT_POLL_UPDATE_SCORE
+  ACT_POLL_UPDATE_SCORE,
+  ACT_POLL_DELETE_POLL
 } from '../constants';
 
 const INITIAL_STATE = {
@@ -23,12 +24,21 @@ export default (state = INITIAL_STATE, action) => {
     case ACT_POLL_CREATE_SUCCESSFULLY:
       return { ...state, isCreating: false };
     case ACT_POLL_UPDATE_SCORE:
-      const { pollid, scores } = action.payload;
+      {
+        const { pollid, scores } = action.payload;
 
-      const newAllPolls = updateScore(state.allPolls, pollid, scores);
-      const newUserPolls = updateScore(state.userPolls, pollid, scores);
+        const newAllPolls = updateScore(state.allPolls, pollid, scores);
+        const newUserPolls = updateScore(state.userPolls, pollid, scores);
 
-      return { ...state, allPolls: newAllPolls, userPolls: newUserPolls };
+        return { ...state, allPolls: newAllPolls, userPolls: newUserPolls };
+      }
+    case ACT_POLL_DELETE_POLL:
+      {
+        const newAllPolls = state.allPolls.filter((p) => p.poll_id !== action.payload);
+        const newUserPolls = state.userPolls.filter((p) => p.poll_id !== action.payload);
+
+        return { ...state, allPolls: newAllPolls, userPolls: newUserPolls };
+      }
     default:
       return state;
   }
