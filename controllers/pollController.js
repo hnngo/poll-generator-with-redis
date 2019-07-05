@@ -1,9 +1,9 @@
 const _ = require('lodash');
-const acLog = require('../utils/acLog');
+const { acLog } = require('../utils/helpFuncs');
 const db = require('../models/postgres');
 const redis = require('redis');
 const { redisClient } = require('../services/redis/redisClient');
-const uuidV4 = require('../utils/uuidV4');
+const { uuidV4, sleep } = require('../utils/helpFuncs');
 
 const LIMIT_PER_PAGE = 10;
 
@@ -38,10 +38,6 @@ const {
 
 const POLL_ALL_RELATED_ATTR = `${POLL_POLLID}, ${POLL_TABLE}.${POLL_USERID}, ${POLL_QUESTION}, ${POLL_OPTIONS}, ${POLL_MULTIPLE_CHOICE}, ${POLL_PRIVATE}, ${POLL_DATE_CREATED}, ${POLL_LAST_UPDATED}, ${USER_NAME}`;
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 //  @METHOD   POST
 //  @PATH     /pollser/create      
 //  @DESC     Start the polling with predefined setting
@@ -64,7 +60,8 @@ exports.postCreatePoll = async (req, res) => {
   }
 
   try {
-    // POSTGRES/ Storage
+    // PENDING: Check if create in high speed
+    // POSTGRES/ Write poll info
     const { rows } = await db.query(
       `INSERT INTO ${POLL_TABLE} (${POLL_USERID}, ${POLL_QUESTION}, ${POLL_OPTIONS}, ${POLL_PRIVATE}, ${POLL_MULTIPLE_CHOICE}) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
       [
@@ -76,14 +73,32 @@ exports.postCreatePoll = async (req, res) => {
       ]
     );
 
+    // Check maximum REDIS/ pipeline: for Example 100000 polls max
+    /*
+      Max key                     = 2^32 = 4294967296 keys
+      Perfomance                  = 1/10 = 429496729.6 keys
+      Max users login at a time   = 1,000,000 users = 1,000,000 session keys
+      One poll contains           = 4 keys (poll-, update-, last-, cursor-)
+      Roughly maximum poll a time ~ 100,000,000 polls
+    */
+
+    const result = await redisClient.scanAsync([0, "MATCH", "poll-*"]);
+    if (result[1].length >= 2) {
+      // PENDING: Implement removal metric assessment - current First In First Out
+      const earliestPollid = result[1][result[1].length - 1].split("poll-")[1];
+
+      await redisClient.delAsync(`poll-${earliestPollid}`);
+      await redisClient.delAsync(`update-${earliestPollid}`);
+      await redisClient.delAsync(`cursor-update-${earliestPollid}`);
+      await redisClient.delAsync(`last-update-${earliestPollid}`);
+    }
+
     // REDIS/ Storage
     const redisPollName = 'poll-' + rows[0][POLL_POLLID];
     const startingScores = new Array(options.length).fill(0);
     const option_index = Array.apply(null, { length: rows[0][POLL_OPTIONS].length })
       .map(Number.call, Number);
     const args = _.flatten(_.zip(startingScores, option_index));
-
-    // PENDING: Check REDIS/ pipeline: 1000 polls max
 
     args.unshift(redisPollName);
     await redisClient.zaddAsync(args);
@@ -104,6 +119,8 @@ exports.getAllPoll = async (req, res) => {
   const {
     user_id
   } = req.query;
+
+  // PENDING: Pagination
 
   try {
     // POSTGRES/ query casual information
@@ -218,6 +235,8 @@ exports.getVotePoll = async (req, res) => {
   // Check if anonymous vote
   let user_id = req.session.auth ? req.session.auth[USER_USERID] : ("anonymous-" + uuidV4());
 
+  // PENDING:REDIS/ Check if number zset exist in keys
+
   // REDIS/ Write to redis db
   const redisPollName = 'poll-' + pollid;
   const redisUpdateName = 'update-' + pollid;
@@ -232,7 +251,6 @@ exports.getVotePoll = async (req, res) => {
       // PENDING: If finish stream back the value
       if (i === ans_arr.length - 1) {
         await sleep(10);
-        // redisClient.publish("update-score", redisPollName);
         const redisClient = redis.createClient();
         redisClient.publish("update-score", redisPollName);
       }
@@ -252,7 +270,7 @@ exports.getVotePoll = async (req, res) => {
     }
 
     updatedData[user_id] = ans_arr;
-    // await sleep(10);
+    await sleep(10);
     await redisClient.setAsync(redisUpdateName, await JSON.stringify(updatedData));
 
     if (user_id.startsWith("anonymous")) {

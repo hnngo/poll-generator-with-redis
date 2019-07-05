@@ -1,4 +1,4 @@
-const acLog = require('../utils/acLog');
+const { acLog } = require('../utils/helpFuncs');
 const _ = require('lodash');
 const redis = require('redis');
 const { redisClient } = require('./redis/redisClient');

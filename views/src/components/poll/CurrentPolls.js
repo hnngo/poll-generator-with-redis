@@ -15,7 +15,11 @@ const ExamplePolling = (props) => {
 
   const renderPollCards = () => {
     if (!poll.allPolls.length) {
-      return <div />;
+      return (
+        <div className="poll-none">
+          No polls were created
+        </div>
+      );
     }
 
     return poll.allPolls.map((poll, i) => {
@@ -30,7 +34,7 @@ const ExamplePolling = (props) => {
   }
 
   return (
-    <div className="poll-containerr">
+    <div className="poll-container">
       <div className="container">
         {renderPollCards()}
       </div>

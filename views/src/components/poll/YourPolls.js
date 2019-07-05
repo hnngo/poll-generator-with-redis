@@ -16,7 +16,11 @@ const YourPolls = (props) => {
 
   const renderPollCards = () => {
     if (!poll.userPolls.length) {
-      return <div />;
+      return (
+        <div className="poll-none">
+          Currently, You have not yet created any poll.
+        </div>
+      );
     }
 
     return poll.userPolls.map((poll, i) => {
@@ -31,7 +35,7 @@ const YourPolls = (props) => {
   }
 
   return (
-    <div className="poll-containerr">
+    <div className="poll-container">
       <div className="container">
         {renderPollCards()}
       </div>

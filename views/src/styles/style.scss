@@ -192,12 +192,21 @@ $breakpoints: (
   }
 }
 
-.poll-containerr {
+.poll-container {
   margin-top: 20px;
-  color: white;
+  // color: white;
 
-  .polling-btn-start {
-    margin: 10px;
+  .poll-none {
+    @include fontSetting(courier, 1.3rem, main-orange, bold, normal, 1px);
+  }
+}
+
+.new-poll-container {
+  margin: 20px;
+  text-align: left;
+
+  .poll-none {
+    @include fontSetting(courier, 1.3rem, main-orange, bold, normal, 1px);
   }
 }
 
@@ -300,11 +309,6 @@ $breakpoints: (
     padding-left: 8px;
     text-align: left;
   }
-}
-
-.new-poll-container {
-  margin: 20px;
-  text-align: left;
 }
 
 .poll-setting-form {

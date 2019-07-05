@@ -93,6 +93,7 @@ const PollCard = (props) => {
                     </div>
                     <div className="poll-scores">
                       {poll.scores[i]}
+                      {/* PENDING: Percentage */}
                     </div>
                   </div>
                   <div className="progress poll-progress">

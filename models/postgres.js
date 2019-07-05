@@ -1,5 +1,5 @@
 const { Pool } = require('pg');
-const acLog = require('../utils/acLog');
+const { acLog } = require('../utils/helpFuncs');
 const connectionString = 'postgresql://polladmin:password@localhost:5432/pollredis';
 
 // Create new Pool

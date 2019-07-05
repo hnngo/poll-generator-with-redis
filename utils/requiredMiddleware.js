@@ -1,4 +1,4 @@
-const acLog = require('./acLog');
+const { acLog } = require('./helpFuncs');
 
 exports.isLogin = (req, res, next) => {
   if (!req.session.auth) {

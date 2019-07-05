@@ -4,7 +4,7 @@ const pollRoutes = require('./routes/pollRoutes');
 const userRoutes = require('./routes/userRoutes');
 const keys = require('./config/keys');
 const redisStore = require('connect-redis')(session);
-const acLog = require('./utils/acLog');
+const { acLog } = require('./utils/helpFuncs');
 require('./models/postgres');
 
 // Create express app

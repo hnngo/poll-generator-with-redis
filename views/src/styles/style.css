@@ -156,13 +156,31 @@ body {
   width: 100%;
 }
 
-.poll-containerr {
+.poll-container {
   margin-top: 20px;
-  color: white;
 }
 
-.poll-containerr .polling-btn-start {
-  margin: 10px;
+.poll-container .poll-none {
+  font-family: 'Courier New', Courier, monospace;
+  color: #e6b87c;
+  font-size: 1.3rem;
+  font-weight: bold;
+  font-style: normal;
+  letter-spacing: 1px;
+}
+
+.new-poll-container {
+  margin: 20px;
+  text-align: left;
+}
+
+.new-poll-container .poll-none {
+  font-family: 'Courier New', Courier, monospace;
+  color: #e6b87c;
+  font-size: 1.3rem;
+  font-weight: bold;
+  font-style: normal;
+  letter-spacing: 1px;
 }
 
 .btn-main-danger,
@@ -298,11 +316,6 @@ body {
   font-style: normal;
   letter-spacing: unset;
   padding-left: 8px;
-  text-align: left;
-}
-
-.new-poll-container {
-  margin: 20px;
   text-align: left;
 }
 

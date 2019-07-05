@@ -1,5 +1,5 @@
 const db = require('../../models/postgres');
-const acLog = require('../../utils/acLog');
+const { acLog, sleep } = require('../../utils/helpFuncs');
 const _ = require('lodash');
 
 const {
@@ -20,10 +20,6 @@ const {
   ATTR_ANSWER_INDEX: POLLANS_INDEX,
   ATTR_ANONYMOUS: POLLANS_ANONYMOUS
 } = db.pollAnswerTable;
-
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 module.exports = async (redisClient) => {
   try {
@@ -92,6 +88,7 @@ module.exports = async (redisClient) => {
               }
 
               if (v.includes('anonymous')) {
+                // PENDING: Check transaction
                 // await db.query('BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE')
                 await db.query(
                   `INSERT INTO ${POLLANS_TABLE} (${POLLANS_POLLID}, ${POLLANS_ANONYMOUS}, ${POLLANS_INDEX}) VALUES ($1, $2, $3)`,
@@ -137,8 +134,8 @@ module.exports = async (redisClient) => {
           await sleep(10);
           const pollid = p.split("last-update-")[1];
           const lastTimeUpdate = await redisClient.getAsync(p);
-          
-          if(((new Date()) - (new Date(lastTimeUpdate))) > 5 * 60 * 1000) {
+
+          if (((new Date()) - (new Date(lastTimeUpdate))) > 5 * 60 * 1000) {
             await sleep(10);
             await redisClient.delAsync(`update-${pollid}`);
             await redisClient.delAsync(`cursor-update-${pollid}`);

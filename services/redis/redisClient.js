@@ -1,7 +1,7 @@
 const redis = require('redis');
 const redisClient = redis.createClient();
 const redisSync = require('./redisSync');
-const acLog = require('../../utils/acLog');
+const { acLog } = require('../../utils/helpFuncs');
 const bluebird = require('bluebird');
 
 // Redis connection init

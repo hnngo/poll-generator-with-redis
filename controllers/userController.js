@@ -1,4 +1,4 @@
-const acLog = require('../utils/acLog');
+const { acLog } = require('../utils/helpFuncs');
 const db = require('../models/postgres');
 const bcrypt = require('bcrypt');
 
