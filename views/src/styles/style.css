@@ -529,6 +529,7 @@ body {
       -ms-flex-direction: row;
           flex-direction: row;
   margin-top: 4px;
+  margin-bottom: 2px;
 }
 
 .poll-card-container .poll-options .poll-vote-form .poll-vote-row .poll-vote-header input {
@@ -538,10 +539,22 @@ body {
 .poll-card-container .poll-options .poll-vote-form .poll-vote-row .poll-vote-header .poll-scores {
   font-family: 'Courier New', Courier, monospace;
   color: black;
-  font-size: 18px;
+  font-size: 1.1rem;
   font-weight: bold;
   font-style: normal;
   letter-spacing: 1px;
+}
+
+.poll-card-container .poll-options .poll-vote-form .poll-vote-row .poll-vote-header .poll-scores span {
+  font-family: 'Courier New', Courier, monospace;
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  font-style: normal;
+  letter-spacing: 1px;
+  background-color: #e0662e;
+  padding: 1px 4px;
+  border-radius: 5px;
 }
 
 .poll-card-container .poll-options .poll-vote-form .poll-vote-row .poll-voted-user {

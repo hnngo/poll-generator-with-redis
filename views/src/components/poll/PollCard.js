@@ -78,7 +78,8 @@ const PollCard = (props) => {
         <form>
           {
             poll.options.map((option, i) => {
-              let border = optionsVoteByUser.includes(i) ? `2px solid ${barColor}` : "";
+              const border = optionsVoteByUser.includes(i) ? `2px solid ${barColor}` : "";
+              const percentage = (scoresNum[i] * 100 / (_.sum(scoresNum))).toFixed(2);
 
               return (
                 <div
@@ -92,8 +93,8 @@ const PollCard = (props) => {
                       {option}
                     </div>
                     <div className="poll-scores">
-                      {poll.scores[i]}
-                      {/* PENDING: Percentage */}
+                      {poll.scores[i]}/
+                      <span>{percentage}%</span>
                     </div>
                   </div>
                   <div className="progress poll-progress">

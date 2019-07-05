@@ -38,6 +38,13 @@ const {
 
 const POLL_ALL_RELATED_ATTR = `${POLL_POLLID}, ${POLL_TABLE}.${POLL_USERID}, ${POLL_QUESTION}, ${POLL_OPTIONS}, ${POLL_MULTIPLE_CHOICE}, ${POLL_PRIVATE}, ${POLL_DATE_CREATED}, ${POLL_LAST_UPDATED}, ${USER_NAME}`;
 
+const removePollOutOfRedis = async (pollid) => {
+  await redisClient.delAsync(`poll-${pollid}`);
+  await redisClient.delAsync(`update-${pollid}`);
+  await redisClient.delAsync(`cursor-update-${pollid}`);
+  await redisClient.delAsync(`last-update-${pollid}`);
+}
+
 //  @METHOD   POST
 //  @PATH     /pollser/create      
 //  @DESC     Start the polling with predefined setting
@@ -73,7 +80,7 @@ exports.postCreatePoll = async (req, res) => {
       ]
     );
 
-    // Check maximum REDIS/ pipeline: for Example 100000 polls max
+    // REDIS/ Check maximum pipeline:
     /*
       Max key                     = 2^32 = 4294967296 keys
       Perfomance                  = 1/10 = 429496729.6 keys
@@ -81,16 +88,11 @@ exports.postCreatePoll = async (req, res) => {
       One poll contains           = 4 keys (poll-, update-, last-, cursor-)
       Roughly maximum poll a time ~ 100,000,000 polls
     */
-
     const result = await redisClient.scanAsync([0, "MATCH", "poll-*"]);
-    if (result[1].length >= 2) {
+    if (result[1].length >= 100000000) {
       // PENDING: Implement removal metric assessment - current First In First Out
       const earliestPollid = result[1][result[1].length - 1].split("poll-")[1];
-
-      await redisClient.delAsync(`poll-${earliestPollid}`);
-      await redisClient.delAsync(`update-${earliestPollid}`);
-      await redisClient.delAsync(`cursor-update-${earliestPollid}`);
-      await redisClient.delAsync(`last-update-${earliestPollid}`);
+      await removePollOutOfRedis(earliestPollid);
     }
 
     // REDIS/ Storage
@@ -225,8 +227,6 @@ exports.getVotePoll = async (req, res) => {
   const { pollid } = req.params;
   const { ans_index } = req.query;
 
-  // PENDING: Check if ans_index out of range
-
   if (!pollid || !ans_index) {
     acLog("Missing information");
     return res.json({ message: "Missing information" });
@@ -235,7 +235,7 @@ exports.getVotePoll = async (req, res) => {
   // Check if anonymous vote
   let user_id = req.session.auth ? req.session.auth[USER_USERID] : ("anonymous-" + uuidV4());
 
-  // PENDING:REDIS/ Check if number zset exist in keys
+  // PENDING:REDIS/ Check if number zset exist in keys if pipeline happend
 
   // REDIS/ Write to redis db
   const redisPollName = 'poll-' + pollid;
@@ -248,7 +248,7 @@ exports.getVotePoll = async (req, res) => {
       // await sleep(10);
       await redisClient.zincrbyAsync(args);
 
-      // PENDING: If finish stream back the value
+      // Trigger socket.io when finished
       if (i === ans_arr.length - 1) {
         await sleep(10);
         const redisClient = redis.createClient();
@@ -296,10 +296,7 @@ exports.deletePollById = async (req, res) => {
     // PENDING: Check case delete when voting
 
     // REDIS/ Clear all the related key to pollid
-    await redisClient.delAsync(`poll-${pollid}`);
-    await redisClient.delAsync(`update-${pollid}`);
-    await redisClient.delAsync(`cursor-update-${pollid}`);
-    await redisClient.delAsync(`last-update-${pollid}`);
+    await removePollOutOfRedis(pollid);
 
     // POSTGRES/ Delete poll from Postgres
     await db.query(
