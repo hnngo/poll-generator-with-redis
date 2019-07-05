@@ -93,8 +93,10 @@ const PollCard = (props) => {
                       {option}
                     </div>
                     <div className="poll-scores">
-                      {poll.scores[i]}/
-                      <span>{percentage}%</span>
+                      {poll.scores[i]}&nbsp;
+                      {
+                        isNaN(percentage) ? <div /> : <span>{percentage}%</span>
+                      }
                     </div>
                   </div>
                   <div className="progress poll-progress">

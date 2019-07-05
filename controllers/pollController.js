@@ -87,13 +87,15 @@ exports.postCreatePoll = async (req, res) => {
       Max users login at a time   = 1,000,000 users = 1,000,000 session keys
       One poll contains           = 4 keys (poll-, update-, last-, cursor-)
       Roughly maximum poll a time ~ 100,000,000 polls
-    */
-    const result = await redisClient.scanAsync([0, "MATCH", "poll-*"]);
-    if (result[1].length >= 100000000) {
-      // PENDING: Implement removal metric assessment - current First In First Out
-      const earliestPollid = result[1][result[1].length - 1].split("poll-")[1];
-      await removePollOutOfRedis(earliestPollid);
-    }
+     */
+    /*
+     const result = await redisClient.scanAsync([0, "MATCH", "poll-*"]);
+     if (result[1].length >= 100000000) {
+       // Implement removal metric assessment - current First In First Out
+       const earliestPollid = result[1][result[1].length - 1].split("poll-")[1];
+       await removePollOutOfRedis(earliestPollid);
+     }
+     */
 
     // REDIS/ Storage
     const redisPollName = 'poll-' + rows[0][POLL_POLLID];
@@ -183,35 +185,6 @@ exports.getAllPoll = async (req, res) => {
         return res.send(rows);
       }
     });
-  } catch (err) {
-    acLog(err);
-    return res.send({ errMsg: err });
-  }
-}
-
-//  @METHOD   GET
-//  @PATH     /pollser/:pollid      
-//  @DESC     Get poll by poll id
-exports.getPollById = async (req, res) => {
-  const { pollid } = req.params;
-
-  if (!pollid) {
-    acLog("Missing information");
-    return res.json({ message: "Missing information" });
-  }
-
-  // PENDING: Consider to remove this poll
-  // PENDING: Fetch all poll if vote publicly by anonymous
-  try {
-    const { rows } = await db.query(`
-    SELECT ${POLL_ALL_RELATED_ATTR}
-    FROM ${POLL_TABLE}
-    INNER JOIN ${USER_TABLE}
-    ON ${POLL_TABLE}.${POLL_USERID} = ${USER_TABLE}.${USER_USERID}
-    WHERE ${POLL_POLLID} = $1;`,
-      [pollid]);
-
-    return res.send(rows[0]);
   } catch (err) {
     acLog(err);
     return res.send({ errMsg: err });

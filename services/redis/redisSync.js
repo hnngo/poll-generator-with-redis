@@ -88,21 +88,22 @@ module.exports = async (redisClient) => {
               }
 
               if (v.includes('anonymous')) {
-                // PENDING: Check transaction
                 // await db.query('BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE')
+                await db.query('BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ');
                 await db.query(
                   `INSERT INTO ${POLLANS_TABLE} (${POLLANS_POLLID}, ${POLLANS_ANONYMOUS}, ${POLLANS_INDEX}) VALUES ($1, $2, $3)`,
                   [pollid, true, formattedData[v]]
                 );
-                // await db.query('COMMIT');
+                await db.query('COMMIT');
               } else {
 
                 // await db.query('BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE');
+                await db.query('BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ');
                 await db.query(
                   `INSERT INTO ${POLLANS_TABLE} (${POLLANS_POLLID}, ${POLLANS_USERID}, ${POLLANS_INDEX}) VALUES ($1, $2, $3)`,
                   [pollid, v, formattedData[v]]
                 );
-                // await db.query('COMMIT');
+                await db.query('COMMIT');
               }
 
               if (i === votees.length - 1) {

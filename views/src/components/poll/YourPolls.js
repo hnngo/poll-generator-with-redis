@@ -8,7 +8,7 @@ import PollCard from './PollCard';
 const YourPolls = (props) => {
   const { actFetchAllPoll, user, poll } = props;
 
-  // PENDING:BUG: Immediately refresh will show you have not yet voted
+  // PENDING: Immediately refresh will show you have not yet voted
   
   useEffect(() => {
     actFetchAllPoll(user.auth.user_id);

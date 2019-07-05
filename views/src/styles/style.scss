@@ -420,10 +420,12 @@ $breakpoints: (
 
     .poll-vote-form {
       .poll-vote-row {
+        @include pos(relative);
         border-radius: 10px;
         background-color: map-get($map: $theme-colors, $key: dim-orange);
         padding: 5px 10px;
         margin: 10px 0px;
+        overflow: hidden;
 
         .poll-vote-header {
           @include display(flex, space-between);
@@ -446,10 +448,17 @@ $breakpoints: (
           }
         }
 
+        .poll-progress {
+          margin-bottom: 8px;
+        }
+
         .poll-voted-user {
-          @include fontSetting(default, 0.8rem, black, 400, normal, 1px);
+          @include pos(absolute, $left: 60%, $bottom: 18px);
+          @include fontSetting(lucida, 1.6rem, rgba(0, 0, 0, 0.308), 400, normal, 1px);
           text-align: right;
-          padding-top: 3px;
+          transform: rotateZ(-25deg);
+          // z-index: 1;
+          // padding-top: 3px;
         }
       }
 
