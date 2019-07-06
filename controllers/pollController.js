@@ -67,7 +67,6 @@ exports.postCreatePoll = async (req, res) => {
   }
 
   try {
-    // PENDING: Check if create in high speed
     // POSTGRES/ Write poll info
     const { rows } = await db.query(
       `INSERT INTO ${POLL_TABLE} (${POLL_USERID}, ${POLL_QUESTION}, ${POLL_OPTIONS}, ${POLL_PRIVATE}, ${POLL_MULTIPLE_CHOICE}) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
@@ -123,8 +122,6 @@ exports.getAllPoll = async (req, res) => {
   const {
     user_id
   } = req.query;
-
-  // PENDING: Pagination
 
   try {
     // POSTGRES/ query casual information
@@ -208,14 +205,18 @@ exports.getVotePoll = async (req, res) => {
   // Check if anonymous vote
   let user_id = req.session.auth ? req.session.auth[USER_USERID] : ("anonymous-" + uuidV4());
 
-  // PENDING:REDIS/ Check if number zset exist in keys if pipeline happend
-
   // REDIS/ Write to redis db
   const redisPollName = 'poll-' + pollid;
   const redisUpdateName = 'update-' + pollid;
   const ans_arr = ans_index.split(',');
 
   try {
+    // Check if redis poll exist because of [overload redis keys/deleted poll] 
+    const isExist = await redisClient.existsAsync(redisPollName);
+    if (!isExist) {
+      return res.send();
+    }
+
     ans_arr.forEach(async (a, i) => {
       const args = [redisPollName, "1", a];
       // await sleep(10);
@@ -224,16 +225,15 @@ exports.getVotePoll = async (req, res) => {
       // Trigger socket.io when finished
       if (i === ans_arr.length - 1) {
         await sleep(10);
-        const redisClient = redis.createClient();
-        redisClient.publish("update-score", redisPollName);
+        let publisher = redis.createClient();
+        publisher.publish("update-score", redisPollName);
       }
     });
-
 
     // REDIS/ Create the update key for poll
     // update-[poll_id] '{ user_id1: [0], user_id2: [0, 1] }'
     // update-[poll_id] '{ anonymous-uuid: [0] }'
-    // await sleep(10);
+    await sleep(10);
     const data = await redisClient.getAsync(redisUpdateName);
 
     // If data not exist, create and store in redis
