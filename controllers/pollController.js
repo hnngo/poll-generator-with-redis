@@ -2,6 +2,7 @@ const _ = require('lodash');
 const { acLog } = require('../utils/helpFuncs');
 const db = require('../models/postgres');
 const redis = require('redis');
+const publisher = redis.createClient();
 const { redisClient } = require('../services/redis/redisClient');
 const { uuidV4, sleep } = require('../utils/helpFuncs');
 
@@ -225,7 +226,6 @@ exports.getVotePoll = async (req, res) => {
       // Trigger socket.io when finished
       if (i === ans_arr.length - 1) {
         await sleep(10);
-        let publisher = redis.createClient();
         publisher.publish("update-score", redisPollName);
       }
     });
@@ -233,26 +233,33 @@ exports.getVotePoll = async (req, res) => {
     // REDIS/ Create the update key for poll
     // update-[poll_id] '{ user_id1: [0], user_id2: [0, 1] }'
     // update-[poll_id] '{ anonymous-uuid: [0] }'
-    await sleep(10);
-    const data = await redisClient.getAsync(redisUpdateName);
+    // await sleep(10);
+    redisClient.watch(redisUpdateName, async (err) => {
+      if (err) throw err;
 
-    // If data not exist, create and store in redis
-    let updatedData = {};
-    if (data) {
-      updatedData = await JSON.parse(data);
-    }
+      const data = await redisClient.getAsync(redisUpdateName);
 
-    updatedData[user_id] = ans_arr;
-    await sleep(10);
-    await redisClient.setAsync(redisUpdateName, await JSON.stringify(updatedData));
+      // If data not exist, create and store in redis
+      let updatedData = {};
+      if (data) {
+        updatedData = await JSON.parse(data);
+      }
 
-    if (user_id.startsWith("anonymous")) {
-      acLog(`An anonymous voted poll ${pollid} choices ${ans_index}`);
-    } else {
-      acLog(`User ${user_id} voted poll ${pollid} choices ${ans_index}`);
-    }
+      updatedData[user_id] = ans_arr;
+      await sleep(10);
+      // await redisClient.setAsync(redisUpdateName, JSON.stringify(updatedData));
+      redisClient.multi()
+        .set(redisUpdateName, JSON.stringify(updatedData))
+        .exec((err) => { if (err) throw err; });
 
-    return res.send();
+      if (user_id.startsWith("anonymous")) {
+        acLog(`An anonymous voted poll ${pollid} choices ${ans_index}`);
+      } else {
+        acLog(`User ${user_id} voted poll ${pollid} choices ${ans_index}`);
+      }
+
+      return res.send();
+    });
   } catch (err) {
     acLog(err);
     return res.send({ errMsg: err });
@@ -266,8 +273,6 @@ exports.deletePollById = async (req, res) => {
   const { pollid } = req.params;
 
   try {
-    // PENDING: Check case delete when voting
-
     // REDIS/ Clear all the related key to pollid
     await removePollOutOfRedis(pollid);
 
