@@ -40,22 +40,24 @@ module.exports = async (redisClient) => {
         const scores = [];
         for (let index = 0; index < poll[POLL_OPTIONS].length; index++) {
           const res = await db.query(
-            `SELECT ${POLLANS_ID} FROM ${POLLANS_TABLE} 
-               WHERE ${POLLANS_POLLID} = $1 AND $2 = ANY(${POLLANS_INDEX})`,
+            `SELECT COUNT(${POLLANS_ID}) FROM ${POLLANS_TABLE} 
+             WHERE ${POLLANS_POLLID} = $1 AND $2 = ANY(${POLLANS_INDEX})`,
             [poll[POLL_POLLID], index]
           );
 
-          scores.push(+res.rowCount);
+          scores.push(+res.rows[0].count);
+
+          if (index === poll[POLL_OPTIONS].length - 1) {
+            const opt_index = Array.apply(null, { length: poll[POLL_OPTIONS].length }).map(Number.call, Number);
+
+            const args = _.flatten(_.zip(scores, opt_index));
+            args.unshift(redisPollSet);
+
+            // Add to Redis DB
+            await sleep(10);
+            await redisClient.zadd(args);
+          }
         }
-
-        const opt_index = Array.apply(null, { length: poll[POLL_OPTIONS].length }).map(Number.call, Number);
-
-        const args = _.flatten(_.zip(scores, opt_index));
-        args.unshift(redisPollSet);
-
-        // Add to Redis DB
-        await sleep(10);
-        await redisClient.zadd(args);
       }
     });
 
@@ -146,7 +148,7 @@ module.exports = async (redisClient) => {
       } catch (err) {
         acLog(err);
       }
-    }, 10000);
+    }, 5000);
   } catch (err) {
     acLog(err);
     throw err;

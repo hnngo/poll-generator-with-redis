@@ -6,7 +6,7 @@ const publisher = redis.createClient();
 const { redisClient } = require('../services/redis/redisClient');
 const { uuidV4, sleep } = require('../utils/helpFuncs');
 
-const LIMIT_PER_PAGE = 10;
+const LIMIT_PER_PAGE = 100;
 
 const {
   TBL_NAME: USER_TABLE,
@@ -39,11 +39,34 @@ const {
 
 const POLL_ALL_RELATED_ATTR = `${POLL_POLLID}, ${POLL_TABLE}.${POLL_USERID}, ${POLL_QUESTION}, ${POLL_OPTIONS}, ${POLL_MULTIPLE_CHOICE}, ${POLL_PRIVATE}, ${POLL_DATE_CREATED}, ${POLL_LAST_UPDATED}, ${USER_NAME}`;
 
+// @Help function - Remove a poll from redis
 const removePollOutOfRedis = async (pollid) => {
   await redisClient.delAsync(`poll-${pollid}`);
   await redisClient.delAsync(`update-${pollid}`);
   await redisClient.delAsync(`cursor-update-${pollid}`);
   await redisClient.delAsync(`last-update-${pollid}`);
+}
+
+const addCurrentScoreToPoll = async (poll) => {
+  const currentScores = [];
+  const args = [
+    `poll-${poll[POLL_POLLID]}`,
+    0,
+    -1,
+    "WITHSCORES"
+  ]
+
+  // REDIS/ Check if redis keep the most updated scores
+  const data = await redisClient.zrangeAsync(args);
+  data.forEach((s, i) => {
+    // Assign to the current score
+    if (!(i % 2)) {
+      currentScores[+s] = data[i + 1];
+    }
+  });
+
+  poll.scores = currentScores;
+  return poll;
 }
 
 //  @METHOD   POST
@@ -60,17 +83,17 @@ exports.postCreatePoll = async (req, res) => {
 
   // Check requirement
   if (!question.length || options.length <= 1) {
-    console.log("Invalid polling information");
+    acLog("Invalid polling information");
     return res.json({ message: "Invalid polling information" });
   } else if (!redisClient) {
-    console.log("Cannot connect to Redis server");
+    acLog("Cannot connect to Redis server");
     return res.json({ message: "Cannot connect to Redis server" });
   }
 
   try {
     // POSTGRES/ Write poll info
     const { rows } = await db.query(
-      `INSERT INTO ${POLL_TABLE} (${POLL_USERID}, ${POLL_QUESTION}, ${POLL_OPTIONS}, ${POLL_PRIVATE}, ${POLL_MULTIPLE_CHOICE}) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      `INSERT INTO ${POLL_TABLE} (${POLL_USERID}, ${POLL_QUESTION}, ${POLL_OPTIONS}, ${POLL_PRIVATE}, ${POLL_MULTIPLE_CHOICE}) VALUES($1, $2, $3, $4, $5) RETURNING * `,
       [
         user_id,
         question,
@@ -107,7 +130,7 @@ exports.postCreatePoll = async (req, res) => {
     args.unshift(redisPollName);
     await redisClient.zaddAsync(args);
 
-    acLog(`User id ${rows[0][POLL_USERID]} created successfully poll id ${rows[0][POLL_POLLID]}`);
+    acLog(`User id ${rows[0][POLL_USERID]} created successfully poll id ${rows[0][POLL_POLLID]} `);
     return res.send(rows[0]);
   } catch (err) {
     acLog(err);
@@ -119,6 +142,7 @@ exports.postCreatePoll = async (req, res) => {
 //  @PATH     /pollser/all      
 //  @DESC     Get all current poll
 //  @QUERY    user_id     Get all poll of a user
+//            poll_id     Get a poll by id
 exports.getAllPoll = async (req, res) => {
   const {
     user_id
@@ -127,60 +151,30 @@ exports.getAllPoll = async (req, res) => {
   try {
     // POSTGRES/ query casual information
     let dbQueryStr = `
-    SELECT ${POLL_ALL_RELATED_ATTR}
-    FROM ${POLL_TABLE}
-    INNER JOIN ${USER_TABLE}
-    ON ${POLL_TABLE}.${POLL_USERID} = ${USER_TABLE}.${USER_USERID}`;
+      SELECT ${ POLL_ALL_RELATED_ATTR}
+      FROM ${ POLL_TABLE}
+      INNER JOIN ${ USER_TABLE}
+      ON ${ POLL_TABLE}.${POLL_USERID} = ${USER_TABLE}.${USER_USERID} `;
 
     if (user_id) {
       dbQueryStr += ` WHERE ${USER_TABLE}.${USER_USERID} = '${user_id}'
-                      ORDER BY ${POLL_DATE_CREATED} DESC
-                      LIMIT ${LIMIT_PER_PAGE};`;
+                      ORDER BY ${ POLL_DATE_CREATED} DESC
+                      LIMIT ${ LIMIT_PER_PAGE}; `;
     } else {
       dbQueryStr += ` ORDER BY ${POLL_DATE_CREATED} DESC
-                      LIMIT ${LIMIT_PER_PAGE};`;
+                      LIMIT ${ LIMIT_PER_PAGE}; `;
     }
 
     const { rows } = await db.query(dbQueryStr);
+    const pollWithScores = [];
 
-    // Get the scores each poll
     rows.forEach(async (poll, i) => {
-      let currentScores = [];
-      const args = [
-        `poll-${poll[POLL_POLLID]}`,
-        0,
-        -1,
-        "WITHSCORES"
-      ]
+      //REDIS/ Check if redis keep the most updated scores
+      const updatedPoll = await addCurrentScoreToPoll(poll);
+      pollWithScores.push(updatedPoll);
 
-      // REDIS/ Check if redis keep the most updated scores
-      const data = await redisClient.zrangeAsync(args);
-      if (data) {
-        data.forEach((s, i) => {
-          // Assign to the current score
-          if (!(i % 2)) {
-            currentScores[+s] = data[i + 1];
-          }
-        });
-      } else {
-        // If not existed then get score from Postgres
-        // POSTGRES/ Get score of each answer
-        for (let index = 0; index < poll[POLL_OPTIONS].length; index++) {
-          const res = await db.query(
-            `SELECT ${POLLANS_ID} FROM ${POLLANS_TABLE} 
-              WHERE ${POLLANS_POLLID} = $1 AND $2 = ANY(${POLLANS_INDEX})`,
-            [poll[POLL_POLLID], index]
-          );
-
-          currentScores.push(+res.rowCount);
-        }
-      };
-
-      poll.scores = currentScores;
-
-      // Check if get enough scores for all polls then send back client
       if (i === (rows.length - 1)) {
-        return res.send(rows);
+        return res.send(pollWithScores);
       }
     });
   } catch (err) {
@@ -253,9 +247,9 @@ exports.getVotePoll = async (req, res) => {
         .exec((err) => { if (err) throw err; });
 
       if (user_id.startsWith("anonymous")) {
-        acLog(`An anonymous voted poll ${pollid} choices ${ans_index}`);
+        acLog(`An anonymous voted poll ${pollid} choices ${ans_index} `);
       } else {
-        acLog(`User ${user_id} voted poll ${pollid} choices ${ans_index}`);
+        acLog(`User ${user_id} voted poll ${pollid} choices ${ans_index} `);
       }
 
       return res.send();
@@ -282,7 +276,7 @@ exports.deletePollById = async (req, res) => {
       [pollid]
     );
 
-    acLog(`User ${req.session.auth[USER_USERID]} delete poll ${pollid}`)
+    acLog(`User ${req.session.auth[USER_USERID]} delete poll ${pollid} `)
     return res.send();
   } catch (err) {
     acLog(err);
