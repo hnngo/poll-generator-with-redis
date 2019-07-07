@@ -47,6 +47,7 @@ const removePollOutOfRedis = async (pollid) => {
   await redisClient.delAsync(`last-update-${pollid}`);
 }
 
+// @Help function - Add current score to a poll
 const addCurrentScoreToPoll = async (poll) => {
   const currentScores = [];
   const args = [
@@ -177,6 +178,31 @@ exports.getAllPoll = async (req, res) => {
         return res.send(pollWithScores);
       }
     });
+  } catch (err) {
+    acLog(err);
+    return res.send({ errMsg: err });
+  }
+}
+
+
+//  @METHOD   GET
+//  @PATH     /pollser/:pollid      
+//  @DESC     Get a poll by id
+exports.getPollById = async (req, res) => {
+  const { pollid } = req.params;
+
+  try {
+    // POSTGRES/ query casual information
+    let dbQueryStr = `
+      SELECT ${POLL_ALL_RELATED_ATTR}
+      FROM ${POLL_TABLE}
+      INNER JOIN ${USER_TABLE}
+      ON ${POLL_TABLE}.${POLL_USERID} = ${USER_TABLE}.${USER_USERID}
+      WHERE ${POLL_TABLE}.${POLL_POLLID} = $1`;
+
+    const { rows } = await db.query(dbQueryStr, [pollid]);
+    const pollWithScores = await addCurrentScoreToPoll(rows[0]);
+    return res.send([pollWithScores]);
   } catch (err) {
     acLog(err);
     return res.send({ errMsg: err });

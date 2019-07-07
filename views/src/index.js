@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { createStore, applyMiddleware, compose } from 'redux';
 import reduxThunk from 'redux-thunk';
+import { BrowserRouter, Route } from 'react-router-dom';
 import App from './components/App';
 import rootReducer from './reducers'
 import * as serviceWorker from './serviceWorker';
@@ -24,7 +25,9 @@ if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
 
 ReactDOM.render(
   <Provider store={store}>
-    <App />
+    <BrowserRouter>
+      <Route path="/" component={App}/>
+    </BrowserRouter>
   </Provider>, document.getElementById('root')
 );
 

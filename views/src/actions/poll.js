@@ -39,6 +39,35 @@ export const actFetchAllPoll = (user_id = null) => {
   }
 };
 
+export const actFetchPollById = (pollid) => {
+  return async (dispatch, getState) => {
+    try {
+      const { user } = getState();
+
+      // Setup query string
+      // let queryString = '/pollser/all?';
+      // let type = ACT_FETCH_POLL_ALL;
+      // if (user_id) {
+      //   queryString += `user_id=${user_id}`;
+      //   type = ACT_FETCH_YOUR_POLLS;
+      // }
+
+      const res = await axios.get(`/pollser/${pollid}`);
+
+      dispatch({
+        type: ACT_FETCH_POLL_ALL,
+        payload: res.data
+      });
+
+      // Trigger socket io the subscribed poll set
+      const subscribedPolls = _.map(res.data, (p) => p.poll_id)
+      user.socket.emit('subscribe poll', subscribedPolls);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+};
+
 export const actCreatePoll = (pollsetting) => {
   return async (dispatch) => {
     try {

@@ -17,13 +17,28 @@ import {
   TAB_NEW_POLL,
   TAB_YOUR_POLLS,
   TAB_SIGN_IN,
-  TAB_SIGN_UP
+  TAB_SIGN_UP,
+  TAB_EXACT_POLL
 } from '../constants';
+import ExactPoll from './poll/ExactPoll';
 
 
 const App = (props) => {
-  const { actSaveSocket, actPollUpdateScore } = props;
-  const [viewTab, setViewTab] = useState(TAB_CURRENT_POLL);
+  const { actSaveSocket, actPollUpdateScore, location } = props;
+
+  // Get the poll query string if exist
+  let queryPoll = null;
+  if (location.search) {
+    const queryArr = location.search.split("?")[1].split("&");
+    queryArr.forEach(q => {
+      if (q.startsWith("pollid")) {
+        queryPoll = q.split("pollid=")[1];
+      }
+    });
+  }
+
+  let initialTab = queryPoll ? TAB_EXACT_POLL : TAB_CURRENT_POLL;
+  const [viewTab, setViewTab] = useState(initialTab);
 
   // Connect socketio
   useEffect(() => {
@@ -49,6 +64,8 @@ const App = (props) => {
     switch (viewTab) {
       case TAB_CURRENT_POLL:
         return <CurrentPolls />;
+      case TAB_EXACT_POLL:
+        return <ExactPoll pollId={queryPoll} />;
       case TAB_NEW_POLL:
         return <NewPoll onSelectTab={(tab) => setViewTab(tab)} />;
       case TAB_YOUR_POLLS:

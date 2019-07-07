@@ -20,6 +20,11 @@ router.get('/vote/:pollid', pollController.getVotePoll);
 //  @QUERY    user_id     Get all poll of a user
 router.get('/all', pollController.getAllPoll);
 
+//  @METHOD   GET
+//  @PATH     /pollser/:pollid      
+//  @DESC     Get a poll by id
+router.get('/:pollid', pollController.getPollById);
+
 //  @METHOD   DELETE
 //  @PATH     /pollser/:pollid      
 //  @DESC     Delete a poll
