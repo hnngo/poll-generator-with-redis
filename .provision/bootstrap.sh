@@ -109,10 +109,11 @@ done
 
 # Rebuild the bycript
 cd /vagrant/
+npm install
 npm install --save bcrypt
 
 # Run the server
-npm run vagrant --prefix /vagrant/
+npm run vagrant
 
 # Run postgresql in vagrant
 # sudo su - postgres
