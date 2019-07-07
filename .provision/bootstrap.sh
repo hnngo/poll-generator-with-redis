@@ -72,9 +72,12 @@ psql -U polladmin pollredis -h localhost -c "CREATE TABLE polls (
   options text[] NOT NULL,
   date_created TIMESTAMP DEFAULT NOW(),
   last_updated TIMESTAMP DEFAULT NOW(),
+  private BOOL NOT NULL DEFAULT false,
+  multiple_choice BOOL NOT NULL DEFAULT false,
   FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );"
 
+# Create table poll_answer
 psql -U polladmin pollredis -h localhost -c "CREATE TABLE poll_answers (
   pollanswer_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   poll_id UUID NOT NULL,
@@ -86,12 +89,30 @@ psql -U polladmin pollredis -h localhost -c "CREATE TABLE poll_answers (
   FOREIGN KEY (poll_id) REFERENCES polls(poll_id) ON DELETE CASCADE
 );"
 
+# Create sample user and poll
+insertUser=$(psql -X -A -U polladmin pollredis -h localhost -t -c "INSERT INTO users (name, email, password) VALUES ('Admin', 'admin7@test.com', 'admin123') RETURNING user_id;")
+
+adminId="$(cut -d' ' -f1 <<<$insertUser)"
+
+insertPoll=$(psql -X -A -U polladmin pollredis -h localhost -t -c "INSERT INTO polls (user_id, question, options) VALUES ('$adminId', 'Example - What is your favorite color?', '{\"Red\", \"Blue\", \"Green\"}') RETURNING poll_id;")
+
+pollId="$(cut -d' ' -f1 <<<$insertPoll)"
+
+for i in `seq 1 14`; do
+  psql -U polladmin pollredis -h localhost -c "INSERT INTO poll_answers (poll_id, answer_index, anonymous) VALUES ('$pollId', '{0, 2}', true);"
+done
+
+for i in `seq 1 27`; do
+  psql -U polladmin pollredis -h localhost -c "INSERT INTO poll_answers (poll_id, answer_index, anonymous) VALUES ('$pollId', '{0, 1}', true);"
+done
+
+
 # Rebuild the bycript
 cd /vagrant/
 npm install --save bcrypt
 
 # Run the server
-# npm run vagrant --prefix /vagrant/
+npm run vagrant --prefix /vagrant/
 
 # Run postgresql in vagrant
 # sudo su - postgres

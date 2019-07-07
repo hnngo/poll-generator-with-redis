@@ -32,7 +32,7 @@ const getALlVotedPolls = async (userId) => {
   const res = {};
   rows.map((p) => {
     res[p[POLLANS_POLLID]] = p[POLLANS_INDEX];
-  })
+  });
 
   return res;
 }
@@ -182,11 +182,20 @@ exports.postSignUpUserWithEmailAndPassword = (req, res) => {
           [name, email, hashPwd]
         );
 
-        // Store the session
-        req.session.auth = rows[0];
+        const userInfo = {
+          user_id: rows[0][USER_USERID],
+          name: rows[0][USER_NAME],
+          email: rows[0][USER_EMAIL]
+        };
 
-        acLog(`Create successfully user ${rows[0].email}`);
-        return res.send(rows[0]);
+        // Store the session
+        req.session.auth = userInfo;
+
+        // Get all the voted polls and choices
+        userInfo.votedPolls = await getALlVotedPolls(userInfo[USER_USERID]);
+
+        acLog(`Create successfully user ${userInfo.email}`);
+        return res.send(userInfo);
       } catch (err) {
         acLog(err);
         return res.send({ errMsg: `${email} has already been existed` });

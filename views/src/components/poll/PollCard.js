@@ -11,9 +11,13 @@ const PollCard = (props) => {
   const [choices, setChoices] = useState([]);
   const { poll, user } = props;
 
+  if (!poll) {
+    return <div />;
+  }
+
   const isPrivate = poll.private;
   const isAuth = user.auth;
-  const isVoted = isAuth && Object.keys(user.auth.votedPolls).includes(poll.poll_id);
+  const isVoted = isAuth && user.auth.votedPolls && Object.keys(user.auth.votedPolls).includes(poll.poll_id);
   const isYourPoll = isAuth && (user.auth.user_id === poll.user_id);
 
   let isAbleToVote = true;

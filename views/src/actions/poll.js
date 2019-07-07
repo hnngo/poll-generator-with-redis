@@ -79,7 +79,7 @@ export const actVotePoll = (pollid, ansIndex) => {
 export const actPollUpdateScore = (info) => {
   const { pollid, res } = info;
   const scores = _.fromPairs(_.chunk(res, 2));
-  console.log()
+
   return {
     type: ACT_POLL_UPDATE_SCORE,
     payload: {
