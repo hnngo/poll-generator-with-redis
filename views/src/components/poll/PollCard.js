@@ -170,6 +170,14 @@ const PollCard = (props) => {
     return <div />;
   }
 
+  const handleClickCopy = (pollid) => {
+    const copyText = document.getElementById(`input-${pollid}`);
+    copyText.focus();
+    copyText.select();
+    document.execCommand("copy");
+    alert("Copied");
+  }
+
   return (
     <div className={"poll-card-container " + boundOption}>
       {renderPollTags()}
@@ -191,6 +199,19 @@ const PollCard = (props) => {
         <div className="poll-updated-time">
           Last voted {formatTime(new Date() - new Date(poll.last_updated))}
         </div>
+      </div>
+      <div className="poll-copy-link">
+        <input
+          id={`input-${poll.poll_id}`}
+          readOnly
+          value={`http://localhost:8080/?pollid=${poll.poll_id}`}
+        />
+        <button
+          onClick={() => handleClickCopy(poll.poll_id)}
+          className="btn-main-orange"
+        >
+          Click here to copy poll link
+        </button>
       </div>
       <div className="poll-delete">
         {renderDeleteBtn()}

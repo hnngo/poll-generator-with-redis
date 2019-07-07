@@ -497,6 +497,22 @@ $breakpoints: (
     }
   }
 
+  .poll-copy-link {
+    margin-bottom: 5px;
+
+    input {
+      @include pos(absolute);
+      opacity: 0;
+      z-index: -1;
+    }
+
+    .btn-main-orange {
+      @include fontSetting(default, 0.9rem, off-white); 
+      padding: 5px 20px;
+      background-color: map-get($map: $theme-colors, $key: shadow-danger);
+    }
+  }
+
   .poll-tags {
     @include pos(absolute, 10px, 5px);
     @include display(flex, flex-start);

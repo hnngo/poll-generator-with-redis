@@ -17,7 +17,7 @@ const ExactPoll = (props) => {
     if (!poll.allPolls.length) {
       return (
         <div className="poll-none">
-          No polls were created
+          There is no existing poll
         </div>
       );
     }

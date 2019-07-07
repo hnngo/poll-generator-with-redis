@@ -89,7 +89,10 @@ const App = (props) => {
       </div>
       <div className="app-nav-btn">
         <NavButtons
-          onSelect={(tab) => setViewTab(tab)}
+          onSelect={(tab) => {
+            setViewTab(tab);
+            props.history.push('/')
+          }}
           selectedTab={viewTab}
         />
       </div>

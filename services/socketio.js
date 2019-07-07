@@ -42,7 +42,10 @@ module.exports = (server) => {
 
     // Listen to client activities
     socket.on('subscribe poll', (listOfPolls) => {
-      connections[socketIndex].subscribedPolls = [...listOfPolls];
+      // Filter null polls
+      const filteredList = listOfPolls.filter(p => p !== null);
+      
+      connections[socketIndex].subscribedPolls = [...filteredList];
     });
 
     socket.on('disconnect', () => {

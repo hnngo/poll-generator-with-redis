@@ -682,6 +682,31 @@ body {
   }
 }
 
+.poll-card-container .poll-copy-link {
+  margin-bottom: 5px;
+}
+
+.poll-card-container .poll-copy-link input {
+  position: absolute;
+  top: unset;
+  right: unset;
+  bottom: unset;
+  left: unset;
+  opacity: 0;
+  z-index: -1;
+}
+
+.poll-card-container .poll-copy-link .btn-main-orange {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  color: #dfdfdf;
+  font-size: 0.9rem;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: unset;
+  padding: 5px 20px;
+  background-color: #792e2e;
+}
+
 .poll-card-container .poll-tags {
   position: absolute;
   top: 10px;
