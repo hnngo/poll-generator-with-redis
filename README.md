@@ -25,7 +25,7 @@ vagrant up
 Port ``80`` in the virtual machine is forwarded to port ```8080``` on your local. Thus, access the project from your local browser through ```localhost:8080``` or ```127.0.0.1:8080```
 
 * You can manually adjust the port by changing this line in ```Vagrantfile``` at project directory:
-``config.vm.network "forwarded_port", guest: 80, host: [your port]```
+```config.vm.network "forwarded_port", guest: 80, host: [your port]```
 
 Some useful vagrant commands:
 
@@ -40,11 +40,11 @@ Other commands can be found [here](https://www.vagrantup.com/docs/cli/reload.htm
 ## Built With
 
 * [Vagrant](https://www.vagrantup.com/) - Setup the development environment
-* [Nginx](https://www.nginx.com/) - Reverse proxy server
+* [Nginx](https://www.nginx.com/) - Reverse proxy server for more efficitently handling routes that require static files and forward dynamic routes to the proper server
 * [Node.js](https://nodejs.org/en/) - Application server
 * [Express.js](https://expressjs.com/) - The web framework for node.js
-* [Redis](https://redis.io/) - In-memory database
-* [Postgresql](https://www.postgresql.org/) - Relational database
-* [Socket.io](https://socket.io/) - Realtime, bi-directional communication between web clients and servers
+* [Redis](https://redis.io/) - In-memory database, responsible for high speed voting to avoid directly write to Postgresql DB which may cause losing the information due to high speed
+* [Postgresql](https://www.postgresql.org/) - Relational database to store all the information
+* [Socket.io](https://socket.io/) - Realtime, bi-directional communication between web clients and server, socket.io plays a crucial role in real-time updating poll result
 * [React](https://reactjs.org/) - The client javascript framework
 * [Redux](https://redux.js.org/introduction/getting-started) - The state management framwork for React

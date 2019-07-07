@@ -79,6 +79,17 @@ body {
   padding-top: 20px;
 }
 
+@media only screen and (max-width: 767px) {
+  .app-container .app-header {
+    font-family: 'Courier New', Courier, monospace;
+    color: #e6b87c;
+    font-size: 2.5rem;
+    font-weight: bold;
+    font-style: normal;
+    letter-spacing: unset;
+  }
+}
+
 .app-container .app-content {
   width: 100%;
   position: relative;
@@ -629,6 +640,28 @@ body {
           flex-direction: row;
 }
 
+@media only screen and (max-width: 767px) {
+  .poll-card-container .poll-info .poll-user-created {
+    display: unset;
+    -webkit-box-pack: unset;
+        -ms-flex-pack: unset;
+            justify-content: unset;
+    -webkit-box-align: unset;
+        -ms-flex-align: unset;
+            align-items: unset;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: row;
+            flex-direction: row;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    color: #555555;
+    font-size: 0.8rem;
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: unset;
+  }
+}
+
 .poll-card-container .poll-info .poll-updated-time {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   color: #555555;
@@ -636,6 +669,17 @@ body {
   font-weight: 400;
   font-style: normal;
   letter-spacing: unset;
+}
+
+@media only screen and (max-width: 767px) {
+  .poll-card-container .poll-info .poll-updated-time {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    color: #555555;
+    font-size: 0.8rem;
+    font-weight: 400;
+    font-style: normal;
+    letter-spacing: unset;
+  }
 }
 
 .poll-card-container .poll-tags {
