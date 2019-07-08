@@ -2,6 +2,10 @@
 
 A poll service that allows clients to create or vote polls with pre-defined choices. The poll can be configured as a public poll or a private poll. Clients are able to select one choice or multiple choices at a time.
 
+![Vote a poll](https://media.giphy.com/media/lSCVkjqBanW3srRQfi/giphy.gif)
+
+![Create a poll](https://media.giphy.com/media/IzWgRWDKn56nAPN5d9/giphy.gif)
+
 ## Getting Started
 
 The project is packed into [Vagrantfile](https://www.vagrantup.com/) which contains all the declarative configuration about software requirements, packages, operating system configuration, etc...

@@ -11,7 +11,7 @@ const ExactPoll = (props) => {
   // Fetch all polls
   useEffect(() => {
     actFetchPollById(pollId);
-  }, [actFetchPollById])
+  }, [actFetchPollById, pollId])
 
   const renderPollCards = () => {
     if (!poll.allPolls.length) {
