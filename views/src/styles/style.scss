@@ -401,12 +401,15 @@ $breakpoints: (
   max-width: 800px;
   margin: 30px 0px;
   border-radius: 20px;
-  // box-shadow: 1px 1px 3px 0px map-get($map: $theme-colors, $key: off-white);
 
   .poll-question {
     @include fontSetting(default, 1.5rem, dim-black, bold);
     text-align: left;
     padding: 10px 0px 10px 20px;
+
+    @include mq(tablet, max) {
+      margin-top: 20px;
+    }
   }
 
   .poll-options {
@@ -461,8 +464,6 @@ $breakpoints: (
           @include fontSetting(lucida, 1.6rem, rgba(0, 0, 0, 0.308), 400, normal, 1px);
           text-align: right;
           transform: rotateZ(-25deg);
-          // z-index: 1;
-          // padding-top: 3px;
         }
       }
 
@@ -493,6 +494,7 @@ $breakpoints: (
 
       @include mq(tablet, max) {
         @include fontSetting(default, 0.8rem, dim-black);
+        max-width: 120px;
       }    
     }
   }
